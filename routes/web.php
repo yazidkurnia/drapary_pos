@@ -4,6 +4,8 @@ use App\Modules\Auth\Presentation\Controllers\AuthController;
 use App\Modules\Auth\Presentation\Controllers\RoleManagementController;
 use App\Modules\Auth\Presentation\Controllers\UserManagementController;
 use App\Http\Controllers\ManageColor\ManageColorsController;
+use App\Http\Controllers\ManageUnit\ManageUnitsController;
+use App\Http\Controllers\ManageSize\ManageSizesController;
 use Illuminate\Support\Facades\Route;
 
 // Guest routes (hanya bisa diakses jika belum login)
@@ -51,8 +53,10 @@ Route::middleware('auth')->group(function () {
 
     // User Management - hanya Owner & Admin Ecommerce
     Route::middleware('role:Owner|Admin Ecommerce')->group(function () {
-        Route::resource('/users', UserManagementController::class);
+        Route::resource('/users', UserManagementController::class);       
         Route::resource('/colors', ManageColorsController::class)->except(['show']);
+        Route::resource('/units', ManageUnitsController::class)->except(['show', 'create']);
+        Route::resource('/sizes', ManageSizesController::class)->except(['show', 'create']);
     });
 
     // Role Management - hanya Owner
