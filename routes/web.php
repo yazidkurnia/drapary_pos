@@ -6,6 +6,7 @@ use App\Modules\Auth\Presentation\Controllers\UserManagementController;
 use App\Http\Controllers\ManageColor\ManageColorsController;
 use App\Http\Controllers\ManageUnit\ManageUnitsController;
 use App\Http\Controllers\ManageSize\ManageSizesController;
+use App\Http\Controllers\ManageBrand\ManageBrandsController;
 use Illuminate\Support\Facades\Route;
 
 // Guest routes (hanya bisa diakses jika belum login)
@@ -57,6 +58,7 @@ Route::middleware('auth')->group(function () {
         Route::resource('/colors', ManageColorsController::class)->except(['show']);
         Route::resource('/units', ManageUnitsController::class)->except(['show', 'create']);
         Route::resource('/sizes', ManageSizesController::class)->except(['show', 'create']);
+        Route::resource('/brands', ManageBrandsController::class)->except(['show', 'create']);
     });
 
     // Role Management - hanya Owner

@@ -8,6 +8,8 @@ use App\Modules\ManageUnits\Domain\Repositories\ManageUnitRepositoryInterface;
 use App\Modules\ManageUnits\Infrastructure\Repositories\UnitRepository;
 use App\Modules\ManageSizes\Domain\Repositories\ManageSizeRepositoryInterface;
 use App\Modules\ManageSizes\Infrastructure\Repositories\SizeRepository;
+use App\Modules\ManageBrands\Domain\Repositories\ManageBrandRepositoryInterface;
+use App\Modules\ManageBrands\Infrastructure\Repositories\BrandRepository;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
@@ -21,6 +23,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(ManageColorRepositoryInterface::class, ColorRepository::class);
         $this->app->bind(ManageUnitRepositoryInterface::class, UnitRepository::class);
         $this->app->bind(ManageSizeRepositoryInterface::class, SizeRepository::class);
+        $this->app->bind(ManageBrandRepositoryInterface::class, BrandRepository::class);
     }
 
     /**

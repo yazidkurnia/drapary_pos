@@ -21,13 +21,14 @@
             </li>
 
             <li class="menu-header">Master Data</li>
-            <li class="dropdown {{ request()->is('colors*', 'units*', 'sizes*') ? 'active' : '' }}">
+            <li class="dropdown {{ request()->is('colors*', 'units*', 'sizes*', 'brands*') ? 'active' : '' }}">
                 <a href="#" class="nav-link has-dropdown"><i class="fas fa-box-open"></i><span>Products</span></a>
                 <ul class="dropdown-menu">
                     <li><a class="nav-link" href="#"><i class="fas fa-list"></i> Product List</a></li>
                     <li><a class="nav-link" href="{{ route('colors.index') }}"><i class="fas fa-palette"></i> Color</a></li>
                     <li><a class="nav-link" href="{{ route('units.index') }}"><i class="fas fa-ruler"></i> Unit</a></li>
                     <li><a class="nav-link" href="{{ route('sizes.index') }}"><i class="fas fa-expand-alt"></i> Size</a></li>
+                    <li><a class="nav-link" href="{{ route('brands.index') }}"><i class="fas fa-tag"></i> Brand</a></li>
                     <li><a class="nav-link" href="#"><i class="fas fa-tags"></i> Product Varian</a></li>
                 </ul>
             </li>
