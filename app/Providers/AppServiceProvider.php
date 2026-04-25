@@ -22,6 +22,10 @@ use App\Modules\ManagePatterns\Domain\Repositories\ManagePatternRepositoryInterf
 use App\Modules\ManagePatterns\Infrastructure\Repositories\PatternRepository;
 use App\Modules\ManageGenders\Domain\Repositories\ManageGenderRepositoryInterface;
 use App\Modules\ManageGenders\Infrastructure\Repositories\GenderRepository;
+use App\Modules\ManageProducts\Domain\Repositories\ManageProductRepositoryInterface;
+use App\Modules\ManageProducts\Infrastructure\Repositories\ProductRepository;
+use App\Modules\ManageProductVariants\Domain\Repositories\ManageProductVariantRepositoryInterface;
+use App\Modules\ManageProductVariants\Infrastructure\Repositories\ProductVariantRepository;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
@@ -42,6 +46,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(ManageCollarRepositoryInterface::class, CollarRepository::class);
         $this->app->bind(ManagePatternRepositoryInterface::class, PatternRepository::class);
         $this->app->bind(ManageGenderRepositoryInterface::class, GenderRepository::class);
+        $this->app->bind(ManageProductRepositoryInterface::class, ProductRepository::class);
+        $this->app->bind(ManageProductVariantRepositoryInterface::class, ProductVariantRepository::class);
     }
 
     /**

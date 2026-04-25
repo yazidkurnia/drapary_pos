@@ -13,6 +13,8 @@ use App\Http\Controllers\ManageSleeve\ManageSleevesController;
 use App\Http\Controllers\ManageCollar\ManageCollarsController;
 use App\Http\Controllers\ManagePattern\ManagePatternsController;
 use App\Http\Controllers\ManageGender\ManageGendersController;
+use App\Http\Controllers\ManageProduct\ManageProductsController;
+use App\Http\Controllers\ManageProductVariant\ManageProductVariantsController;
 use Illuminate\Support\Facades\Route;
 
 // Guest routes (hanya bisa diakses jika belum login)
@@ -71,6 +73,9 @@ Route::middleware('auth')->group(function () {
         Route::resource('/collars', ManageCollarsController::class)->except(['show', 'create']);
         Route::resource('/patterns', ManagePatternsController::class)->except(['show', 'create']);
         Route::resource('/genders', ManageGendersController::class)->except(['show', 'create']);
+        Route::get('/products/by-brand/{brandId}', [ManageProductsController::class, 'byBrand'])->name('products.by-brand');
+        Route::resource('/products', ManageProductsController::class)->except(['show', 'create']);
+        Route::resource('/product-variants', ManageProductVariantsController::class)->except(['show', 'create']);
     });
 
     // Role Management - hanya Owner

@@ -19,6 +19,15 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             PermissionSeeder::class,
             UserSeeder::class,
+            ColorSeeder::class,
+            UnitSeeder::class,
+            SizeSeeder::class,
+            MaterialSeeder::class,
+            FitSeeder::class,
+            SleeveSeeder::class,
+            CollarSeeder::class,
+            PatternSeeder::class,
+            GenderSeeder::class,
         ]);
     }
 }
