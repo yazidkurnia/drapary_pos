@@ -10,6 +10,8 @@ use App\Modules\ManageSizes\Domain\Repositories\ManageSizeRepositoryInterface;
 use App\Modules\ManageSizes\Infrastructure\Repositories\SizeRepository;
 use App\Modules\ManageBrands\Domain\Repositories\ManageBrandRepositoryInterface;
 use App\Modules\ManageBrands\Infrastructure\Repositories\BrandRepository;
+use App\Modules\ManageMaterials\Domain\Repositories\ManageMaterialRepositoryInterface;
+use App\Modules\ManageMaterials\Infrastructure\Repositories\MaterialRepository;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
@@ -24,6 +26,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(ManageUnitRepositoryInterface::class, UnitRepository::class);
         $this->app->bind(ManageSizeRepositoryInterface::class, SizeRepository::class);
         $this->app->bind(ManageBrandRepositoryInterface::class, BrandRepository::class);
+        $this->app->bind(ManageMaterialRepositoryInterface::class, MaterialRepository::class);
     }
 
     /**
