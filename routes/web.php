@@ -8,6 +8,11 @@ use App\Http\Controllers\ManageUnit\ManageUnitsController;
 use App\Http\Controllers\ManageSize\ManageSizesController;
 use App\Http\Controllers\ManageBrand\ManageBrandsController;
 use App\Http\Controllers\ManageMaterial\ManageMaterialsController;
+use App\Http\Controllers\ManageFit\ManageFitsController;
+use App\Http\Controllers\ManageSleeve\ManageSleevesController;
+use App\Http\Controllers\ManageCollar\ManageCollarsController;
+use App\Http\Controllers\ManagePattern\ManagePatternsController;
+use App\Http\Controllers\ManageGender\ManageGendersController;
 use Illuminate\Support\Facades\Route;
 
 // Guest routes (hanya bisa diakses jika belum login)
@@ -61,6 +66,11 @@ Route::middleware('auth')->group(function () {
         Route::resource('/sizes', ManageSizesController::class)->except(['show', 'create']);
         Route::resource('/brands', ManageBrandsController::class)->except(['show', 'create']);
         Route::resource('/materials', ManageMaterialsController::class)->except(['show', 'create']);
+        Route::resource('/fits', ManageFitsController::class)->except(['show', 'create']);
+        Route::resource('/sleeves', ManageSleevesController::class)->except(['show', 'create']);
+        Route::resource('/collars', ManageCollarsController::class)->except(['show', 'create']);
+        Route::resource('/patterns', ManagePatternsController::class)->except(['show', 'create']);
+        Route::resource('/genders', ManageGendersController::class)->except(['show', 'create']);
     });
 
     // Role Management - hanya Owner

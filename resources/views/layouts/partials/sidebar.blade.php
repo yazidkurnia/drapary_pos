@@ -21,7 +21,7 @@
             </li>
 
             <li class="menu-header">Master Data</li>
-            <li class="dropdown {{ request()->is('colors*', 'units*', 'sizes*', 'brands*', 'materials*') ? 'active' : '' }}">
+            <li class="dropdown {{ request()->is('colors*', 'units*', 'sizes*', 'brands*', 'materials*', 'fits*', 'sleeves*', 'collars*', 'patterns*', 'genders*') ? 'active' : '' }}">
                 <a href="#" class="nav-link has-dropdown"><i class="fas fa-box-open"></i><span>Products</span></a>
                 <ul class="dropdown-menu">
                     <li><a class="nav-link" href="#"><i class="fas fa-list"></i> Product List</a></li>
@@ -30,6 +30,11 @@
                     <li><a class="nav-link" href="{{ route('sizes.index') }}"><i class="fas fa-expand-alt"></i> Size</a></li>
                     <li><a class="nav-link" href="{{ route('brands.index') }}"><i class="fas fa-tag"></i> Brand</a></li>
                     <li><a class="nav-link" href="{{ route('materials.index') }}"><i class="fas fa-scroll"></i> Material</a></li>
+                    <li><a class="nav-link" href="{{ route('fits.index') }}"><i class="fas fa-tshirt"></i> Tipe Potongan</a></li>
+                    <li><a class="nav-link" href="{{ route('sleeves.index') }}"><i class="fas fa-tshirt"></i> Tipe Lengan</a></li>
+                    <li><a class="nav-link" href="{{ route('collars.index') }}"><i class="fas fa-tshirt"></i> Tipe Leher</a></li>
+                    <li><a class="nav-link" href="{{ route('patterns.index') }}"><i class="fas fa-border-all"></i> Motif/Pola</a></li>
+                    <li><a class="nav-link" href="{{ route('genders.index') }}"><i class="fas fa-venus-mars"></i> Jenis Kelamin</a></li>
                     <li><a class="nav-link" href="#"><i class="fas fa-tags"></i> Product Varian</a></li>
                 </ul>
             </li>
