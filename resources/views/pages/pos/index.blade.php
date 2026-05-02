@@ -1147,7 +1147,8 @@ $(document).ready(function () {
        LOGIKA KERANJANG
     ============================================================ */
     function findItem(pid, vid) {
-        return cart.find(i => i.pid === pid && i.vid === vid);
+        // vid bisa string (dari onclick) atau number (dari JSON) — pakai == agar keduanya cocok
+        return cart.find(i => i.pid === pid && i.vid == vid);
     }
 
     function addToCart($col) {
@@ -1182,7 +1183,7 @@ $(document).ready(function () {
     }
 
     function removeItem(pid, vid) {
-        const idx = cart.findIndex(i => i.pid === pid && i.vid === vid);
+        const idx = cart.findIndex(i => i.pid === pid && i.vid == vid);
         if (idx > -1) { cart.splice(idx, 1); renderCart(); }
     }
 
