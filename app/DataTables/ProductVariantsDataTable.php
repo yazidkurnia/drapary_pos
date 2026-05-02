@@ -5,6 +5,7 @@ namespace App\DataTables;
 use App\Models\ProductVariant;
 use Illuminate\Database\Eloquent\Builder as QueryBuilder;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Storage;
 use Yajra\DataTables\EloquentDataTable;
 use Yajra\DataTables\Html\Builder as HtmlBuilder;
 use Yajra\DataTables\Html\Column;
@@ -36,30 +37,55 @@ class ProductVariantsDataTable extends DataTable
                 $class = $row->stock > 10 ? 'success' : ($row->stock > 0 ? 'warning' : 'danger');
                 return '<span class="badge badge-' . $class . '">' . $row->stock . '</span>';
             })
+            ->addColumn('images_preview', function ($row) {
+                $encId   = Crypt::encryptString($row->id);
+                $primary = $row->images->firstWhere('is_primary', 1) ?? $row->images->first();
+                $count   = $row->images->count();
+
+                if (!$primary) {
+                    return '<div class="text-center">
+                        <span class="text-muted" style="font-size:11px;"><i class="fas fa-image"></i><br>Tidak ada</span>
+                    </div>';
+                }
+
+                $url = Storage::url($primary->image_path);
+                $badge = $count > 1
+                    ? '<span class="badge badge-secondary" style="font-size:9px;">+' . ($count - 1) . '</span>'
+                    : '';
+
+                return '
+                    <div class="text-center" style="cursor:pointer;" onclick="viewImages(\'' . $encId . '\')" title="Klik untuk lihat semua gambar">
+                        <img src="' . e($url) . '"
+                             style="width:52px;height:52px;object-fit:cover;border-radius:5px;border:1px solid #dee2e6;display:block;margin:0 auto 3px;"
+                             alt="">
+                        ' . $badge . '
+                    </div>';
+            })
             ->addColumn('action', function ($row) {
+                $encId = Crypt::encryptString($row->id);
                 return '
                     <button type="button"
                         class="btn btn-sm btn-icon btn-warning mr-1"
-                        onclick="edit(\'' . Crypt::encryptString($row->id) . '\')"
+                        onclick="edit(\'' . $encId . '\')"
                         data-toggle="tooltip" data-placement="top" title="Edit Varian">
                         <i class="fas fa-pencil-alt"></i>
                     </button>
                     <button type="button"
                         class="btn btn-sm btn-icon btn-danger"
-                        onclick="confirmDelete(\'' . Crypt::encryptString($row->id) . '\')"
+                        onclick="confirmDelete(\'' . $encId . '\')"
                         data-toggle="tooltip" data-placement="top" title="Hapus Varian">
                         <i class="fas fa-trash-alt"></i>
                     </button>
                 ';
             })
-            ->rawColumns(['action', 'variant_info', 'stock_badge']);
+            ->rawColumns(['action', 'variant_info', 'stock_badge', 'images_preview']);
     }
 
     public function query(ProductVariant $model): QueryBuilder
     {
         return $model->newQuery()->with([
             'product.brand', 'color', 'size', 'material',
-            'fit', 'sleeve', 'collar', 'pattern', 'gender', 'unit',
+            'fit', 'sleeve', 'collar', 'pattern', 'gender', 'unit', 'images',
         ]);
     }
 
@@ -97,6 +123,7 @@ class ProductVariantsDataTable extends DataTable
     {
         return [
             Column::make('DT_RowIndex')->title('No')->orderable(false)->searchable(false),
+            Column::make('images_preview')->title('Gambar')->orderable(false)->searchable(false)->addClass('text-center'),
             Column::make('brand_name')->title('Brand')->orderable(false)->searchable(false),
             Column::make('product_name')->title('Produk')->orderable(false)->searchable(false),
             Column::make('sku')->title('SKU'),

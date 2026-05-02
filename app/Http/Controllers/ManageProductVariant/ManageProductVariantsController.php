@@ -52,10 +52,16 @@ class ManageProductVariantsController extends Controller
             'sku'        => 'required|string|max:100',
             'price'      => 'required|numeric|min:0',
             'stock'      => 'required|integer|min:0',
+            'images.*'   => 'nullable|image|max:2048',
         ]);
 
         try {
-            $this->manageVariantService->store(ProductVariantDTO::fromRequest($request));
+            $variant = $this->manageVariantService->store(ProductVariantDTO::fromRequest($request));
+
+            if ($request->hasFile('images')) {
+                $this->manageVariantService->store_images($variant, $request->file('images'));
+            }
+
             return response()->json(['status' => 'success', 'message' => 'Varian produk berhasil ditambahkan']);
         } catch (\InvalidArgumentException $e) {
             return response()->json(['status' => 'failed', 'message' => $e->getMessage()]);
@@ -79,10 +85,16 @@ class ManageProductVariantsController extends Controller
             'sku'        => 'required|string|max:100',
             'price'      => 'required|numeric|min:0',
             'stock'      => 'required|integer|min:0',
+            'images.*'   => 'nullable|image|max:2048',
         ]);
 
         try {
-            $this->manageVariantService->update_service(ProductVariantDTO::fromRequest($request), $variantId);
+            $variant = $this->manageVariantService->update_service(ProductVariantDTO::fromRequest($request), $variantId);
+
+            if ($request->hasFile('images')) {
+                $this->manageVariantService->store_images($variant, $request->file('images'));
+            }
+
             return response()->json(['status' => 'success', 'message' => 'Varian produk berhasil diubah']);
         } catch (\InvalidArgumentException $e) {
             return response()->json(['status' => 'failed', 'message' => $e->getMessage()]);
@@ -94,6 +106,16 @@ class ManageProductVariantsController extends Controller
         try {
             $this->manageVariantService->destroy_variant($variantId);
             return response()->json(['status' => 'success', 'message' => 'Berhasil menghapus data']);
+        } catch (\Throwable $e) {
+            return response()->json(['status' => 'failed', 'message' => $e->getMessage()]);
+        }
+    }
+
+    public function destroyImage(string $imageId)
+    {
+        try {
+            $this->manageVariantService->destroy_image($imageId);
+            return response()->json(['status' => 'success', 'message' => 'Gambar berhasil dihapus']);
         } catch (\Throwable $e) {
             return response()->json(['status' => 'failed', 'message' => $e->getMessage()]);
         }

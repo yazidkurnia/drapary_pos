@@ -28,6 +28,7 @@ class DatabaseSeeder extends Seeder
             CollarSeeder::class,
             PatternSeeder::class,
             GenderSeeder::class,
+            ProductSeeder::class,
         ]);
     }
 }

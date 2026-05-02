@@ -3,7 +3,10 @@
 namespace App\Modules\ManageProductVariants\Application\Services;
 
 use App\Models\ProductVariant;
+use App\Models\ProductVariantImage;
 use App\Modules\ManageProductVariants\Application\DTOs\ProductVariantDTO;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use App\Modules\ManageProductVariants\Domain\Repositories\ManageProductVariantRepositoryInterface;
 use App\Modules\ManageProductVariants\Domain\Usecases\CreateManageProductVariantUsecase;
 use App\Modules\ManageProductVariants\Domain\Usecases\UpdateManageProductVariantUsecase;
@@ -40,8 +43,13 @@ class ManageProductVariantService
             throw new \InvalidArgumentException('Data varian tidak ditemukan!');
         }
 
-        $variant->load(['product.brand', 'color', 'size', 'material', 'fit', 'sleeve', 'collar', 'pattern', 'gender', 'unit']);
+        $variant->load(['product.brand', 'color', 'size', 'material', 'fit', 'sleeve', 'collar', 'pattern', 'gender', 'unit', 'images']);
         $variant->mvid = Crypt::encryptString($variant->id);
+
+        $variant->images->each(function ($img) {
+            $img->encrypted_id  = Crypt::encryptString($img->id);
+            $img->url           = Storage::url($img->image_path);
+        });
 
         return $variant;
     }
@@ -62,6 +70,31 @@ class ManageProductVariantService
         }
 
         return $this->updateVariantUsecase->update_usecase($dto, $id);
+    }
+
+    /** @param UploadedFile[] $images */
+    public function store_images(ProductVariant $variant, array $images): void
+    {
+        $sortOrder = $variant->images()->max('sort_order') ?? -1;
+
+        foreach ($images as $image) {
+            $path = $image->store("product-variants/{$variant->id}", 'public');
+            ProductVariantImage::create([
+                'product_variant_id' => $variant->id,
+                'image_path'         => $path,
+                'sort_order'         => ++$sortOrder,
+                'is_primary'         => $sortOrder === 0,
+            ]);
+        }
+    }
+
+    public function destroy_image(string $encryptedImageId): void
+    {
+        $id    = (int) Crypt::decryptString($encryptedImageId);
+        $image = ProductVariantImage::findOrFail($id);
+
+        Storage::disk('public')->delete($image->image_path);
+        $image->delete();
     }
 
     public function destroy_variant(string $variantId): ProductVariant

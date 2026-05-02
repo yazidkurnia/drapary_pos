@@ -203,6 +203,19 @@
                             </div>
                         </div>
                     </div>
+
+                    <hr class="my-3">
+
+                    {{-- Gambar --}}
+                    <div class="section-title font-weight-bold text-primary mb-2"><i class="fas fa-images mr-1"></i> Gambar Produk <small class="text-muted font-weight-normal">(opsional, bisa lebih dari satu)</small></div>
+                    <div id="add-image-preview-wrap" class="d-flex flex-wrap mb-2" style="gap:8px;min-height:40px;"></div>
+                    <div>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="$('#add_image_input').click()">
+                            <i class="fas fa-plus mr-1"></i> Tambah Gambar
+                        </button>
+                        <small class="text-muted ml-2">Format: JPG, PNG, WEBP — Maks. 2MB per file</small>
+                    </div>
+                    <input type="file" id="add_image_input" multiple accept="image/*" class="d-none">
                 </form>
             </div>
             <div class="modal-footer bg-whitesmoke">
@@ -383,11 +396,49 @@
                             </div>
                         </div>
                     </div>
+
+                    <hr class="my-3">
+
+                    {{-- Gambar --}}
+                    <div class="section-title font-weight-bold text-primary mb-2"><i class="fas fa-images mr-1"></i> Gambar Produk <small class="text-muted font-weight-normal">(opsional, bisa lebih dari satu)</small></div>
+                    <div id="edit-existing-images" class="d-flex flex-wrap mb-2" style="gap:8px;min-height:40px;">
+                        <p class="text-muted small my-auto">Memuat gambar...</p>
+                    </div>
+                    <div id="edit-image-preview-wrap" class="d-flex flex-wrap mb-2" style="gap:8px;"></div>
+                    <div>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="$('#edit_image_input').click()">
+                            <i class="fas fa-plus mr-1"></i> Tambah Gambar Baru
+                        </button>
+                        <small class="text-muted ml-2">Format: JPG, PNG, WEBP — Maks. 2MB per file</small>
+                    </div>
+                    <input type="file" id="edit_image_input" multiple accept="image/*" class="d-none">
                 </form>
             </div>
             <div class="modal-footer bg-whitesmoke">
                 <button type="button" class="btn btn-light" data-dismiss="modal"><i class="fas fa-times mr-1"></i> Batal</button>
                 <button type="button" class="btn btn-primary" onclick="update()"><i class="fas fa-save mr-1"></i> Simpan Perubahan</button>
+            </div>
+        </div>
+    </div>
+</div>
+{{-- ── View Images Modal ───────────────────────────────────── --}}
+<div class="modal fade" id="viewImagesModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="viewImagesModalTitle">
+                    <i class="fas fa-images text-primary mr-1"></i> Galeri Gambar Varian
+                </h5>
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <div id="view-images-gallery" class="d-flex flex-wrap justify-content-start" style="gap:12px;min-height:80px;align-items:flex-start;">
+                    <p class="text-muted small my-auto">Memuat gambar...</p>
+                </div>
+            </div>
+            <div class="modal-footer bg-whitesmoke">
+                <small class="text-muted mr-auto"><i class="fas fa-info-circle mr-1"></i> Klik gambar untuk melihat ukuran penuh</small>
+                <button type="button" class="btn btn-light" data-dismiss="modal"><i class="fas fa-times mr-1"></i> Tutup</button>
             </div>
         </div>
     </div>
@@ -405,6 +456,48 @@
         .dt-empty-desc { font-size: 13px; color: #9ca3af; line-height: 1.6; margin-bottom: 0; }
         #product-variants-table tbody td.dataTables_empty { padding: 0 !important; border: none !important; }
         .section-title { font-size: 13px; text-transform: uppercase; letter-spacing: .5px; }
+        .img-thumb-wrap { position: relative; width: 80px; height: 80px; flex-shrink: 0; }
+        .img-thumb-wrap img { width: 100%; height: 100%; object-fit: cover; border-radius: 6px; border: 1px solid #dee2e6; }
+        .img-thumb-wrap .img-remove-btn {
+            position: absolute; top: -6px; right: -6px;
+            width: 20px; height: 20px; border-radius: 50%;
+            background: #e3342f; border: none; color: #fff;
+            font-size: 11px; line-height: 20px; text-align: center;
+            cursor: pointer; padding: 0;
+        }
+        .img-thumb-wrap .img-primary-badge {
+            position: absolute; bottom: 2px; left: 2px;
+            background: #6777ef; color: #fff;
+            font-size: 9px; padding: 1px 4px; border-radius: 3px;
+        }
+        /* Gallery modal */
+        .gallery-item {
+            position: relative;
+            width: 140px; height: 140px;
+            flex-shrink: 0;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 2px solid #dee2e6;
+            cursor: pointer;
+            transition: border-color .2s, transform .2s;
+        }
+        .gallery-item:hover { border-color: #6777ef; transform: scale(1.03); }
+        .gallery-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .gallery-item .gallery-primary-badge {
+            position: absolute; top: 6px; left: 6px;
+            background: #6777ef; color: #fff;
+            font-size: 10px; font-weight: 600;
+            padding: 2px 6px; border-radius: 4px;
+        }
+        .gallery-item .gallery-overlay {
+            position: absolute; inset: 0;
+            background: rgba(0,0,0,0); display: flex;
+            align-items: center; justify-content: center;
+            transition: background .2s;
+        }
+        .gallery-item:hover .gallery-overlay { background: rgba(0,0,0,.25); }
+        .gallery-item .gallery-overlay i { color: #fff; font-size: 22px; opacity: 0; transition: opacity .2s; }
+        .gallery-item:hover .gallery-overlay i { opacity: 1; }
     </style>
 @endpush
 
@@ -413,84 +506,146 @@
     <script src="{{ asset('stisla-assets/modules/datatables/DataTables-1.10.16/js/dataTables.bootstrap4.min.js') }}"></script>
     {{ $dataTable->scripts() }}
     <script>
-        const PRODUCTS_BY_BRAND_URL = '{{ route('products.by-brand', ':id') }}';
+        const PRODUCTS_BY_BRAND_URL      = '{{ route('products.by-brand', ':id') }}';
+        const DELETE_IMAGE_URL           = '{{ route('product-variant-images.destroy', ':id') }}';
+
+        /* ── Pending images state ──────────────────────────────── */
+        let addPendingImages  = [];   // File[] untuk modal tambah
+        let editPendingImages = [];   // File[] untuk modal edit
 
         $(document).ready(function () {
             $('#addModal').on('hidden.bs.modal', resetAddForm);
-            $(document).on('draw.dt', '#product-variants-table', function () { $('[data-toggle="tooltip"]').tooltip(); });
+            $('#editModal').on('hidden.bs.modal', function () {
+                editPendingImages = [];
+                $('#edit-image-preview-wrap').empty();
+                $('#edit_image_input').val('');
+            });
+            $(document).on('draw.dt', '#product-variants-table', function () {
+                $('[data-toggle="tooltip"]').tooltip();
+            });
+
+            /* ── File input listeners ───────────────────────────── */
+            $('#add_image_input').on('change', function () {
+                Array.from(this.files).forEach(f => appendPendingPreview(f, 'add'));
+                this.value = '';
+            });
+            $('#edit_image_input').on('change', function () {
+                Array.from(this.files).forEach(f => appendPendingPreview(f, 'edit'));
+                this.value = '';
+            });
         });
 
+        /* ── Helpers ───────────────────────────────────────────── */
+        function setLoad(s) {
+            s === 'load'
+                ? Swal.fire({ title: 'Memuat data...', allowOutsideClick: false, didOpen: () => Swal.showLoading() })
+                : Swal.close();
+        }
+        function swalAlert(s, m) {
+            Swal.fire({ icon: s, title: s === 'success' ? 'Berhasil!' : 'Gagal!', text: m, showConfirmButton: true });
+        }
+
+        /* ── Image preview helpers ─────────────────────────────── */
+        function appendPendingPreview(file, mode) {
+            const arr     = mode === 'add' ? addPendingImages : editPendingImages;
+            const idx     = arr.length;
+            const wrapId  = mode === 'add' ? 'add-image-preview-wrap' : 'edit-image-preview-wrap';
+            arr.push(file);
+
+            const reader = new FileReader();
+            reader.onload = e => {
+                const html = `
+                    <div class="img-thumb-wrap" id="${mode}-pending-${idx}">
+                        <img src="${e.target.result}" alt="">
+                        <button type="button" class="img-remove-btn" onclick="removePending('${mode}', ${idx})" title="Hapus">×</button>
+                    </div>`;
+                $('#' + wrapId).append(html);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function removePending(mode, idx) {
+            const arr = mode === 'add' ? addPendingImages : editPendingImages;
+            arr[idx] = null;
+            $(`#${mode}-pending-${idx}`).remove();
+        }
+
+        function buildFormData(prefix) {
+            const p  = prefix ? prefix + '_' : '';
+            const fd = new FormData();
+            fd.append('_token',      '{{ csrf_token() }}');
+            fd.append('product_id',  $('#' + p + 'product_id').val()   ?? '');
+            fd.append('sku',         ($('#' + p + 'sku').val()         ?? '').trim());
+            fd.append('color_id',    $('#' + p + 'color_id').val()     ?? '');
+            fd.append('size_id',     $('#' + p + 'size_id').val()      ?? '');
+            fd.append('material_id', $('#' + p + 'material_id').val()  ?? '');
+            fd.append('fit_id',      $('#' + p + 'fit_id').val()       ?? '');
+            fd.append('sleeve_id',   $('#' + p + 'sleeve_id').val()    ?? '');
+            fd.append('collar_id',   $('#' + p + 'collar_id').val()    ?? '');
+            fd.append('pattern_id',  $('#' + p + 'pattern_id').val()   ?? '');
+            fd.append('gender_id',   $('#' + p + 'gender_id').val()    ?? '');
+            fd.append('unit_id',     $('#' + p + 'unit_id').val()      ?? '');
+            fd.append('price',       $('#' + p + 'price').val()        ?? 0);
+            fd.append('stock',       $('#' + p + 'stock').val()        ?? 0);
+
+            const pending = prefix === 'edit' ? editPendingImages : addPendingImages;
+            pending.filter(f => f !== null).forEach(f => fd.append('images[]', f));
+
+            return fd;
+        }
+
+        function validateFields(prefix) {
+            const p      = prefix ? prefix + '_' : '';
+            let   valid  = true;
+            const pid    = $('#' + p + 'product_id').val();
+            const sku    = ($('#' + p + 'sku').val() ?? '').trim();
+            const price  = $('#' + p + 'price').val();
+            const stock  = $('#' + p + 'stock').val();
+
+            if (!pid) { $('#' + p + 'product_id').addClass('is-invalid'); $('#' + p + 'product_id_err').text('Produk harus dipilih.'); valid = false; }
+            else       { $('#' + p + 'product_id').removeClass('is-invalid'); }
+            if (!sku)  { $('#' + p + 'sku').addClass('is-invalid'); $('#' + p + 'sku_err').text('SKU tidak boleh kosong.'); valid = false; }
+            else       { $('#' + p + 'sku').removeClass('is-invalid'); }
+            if (price === '' || Number(price) < 0) { $('#' + p + 'price_err').text('Harga harus diisi.'); valid = false; }
+            else                                   { $('#' + p + 'price_err').text(''); }
+            if (stock === '') { $('#' + p + 'stock').addClass('is-invalid'); $('#' + p + 'stock_err').text('Stok harus diisi.'); valid = false; }
+            else              { $('#' + p + 'stock').removeClass('is-invalid'); }
+
+            return valid;
+        }
+
+        /* ── Products dropdown ─────────────────────────────────── */
+        function loadProducts(brandId, targetId) {
+            const $t = $('#' + targetId);
+            $t.html('<option value="">Memuat...</option>');
+            if (!brandId) { $t.html('<option value="">-- Pilih produk --</option>'); return; }
+            $.get(PRODUCTS_BY_BRAND_URL.replace(':id', brandId), data => {
+                let opts = '<option value="">-- Pilih Produk --</option>';
+                data.forEach(p => { opts += `<option value="${p.id}">${p.product_name}</option>`; });
+                $t.html(opts);
+            }).fail(() => $t.html('<option value="">Gagal memuat produk</option>'));
+        }
+
+        /* ── Reset add form ────────────────────────────────────── */
         function resetAddForm() {
             $('#add-form select, #add-form input').val('').removeClass('is-invalid');
             $('[id$="_err"]').text('');
             $('#product_id').html('<option value="">-- Pilih produk --</option>');
+            addPendingImages = [];
+            $('#add-image-preview-wrap').empty();
+            $('#add_image_input').val('');
         }
 
-        function setLoad(s) { s === 'load' ? Swal.fire({ title: 'Memuat data...', allowOutsideClick: false, didOpen: () => Swal.showLoading() }) : Swal.close(); }
-        function swalAlert(s, m) { Swal.fire({ icon: s, title: s === 'success' ? 'Berhasil!' : 'Gagal!', text: m, showConfirmButton: true }); }
-
-        function loadProducts(brandId, targetId) {
-            const $target = $('#' + targetId);
-            $target.html('<option value="">Memuat...</option>');
-            if (!brandId) { $target.html('<option value="">-- Pilih produk --</option>'); return; }
-            $.get(PRODUCTS_BY_BRAND_URL.replace(':id', brandId), function (data) {
-                let opts = '<option value="">-- Pilih Produk --</option>';
-                data.forEach(p => { opts += `<option value="${p.id}">${p.product_name}</option>`; });
-                $target.html(opts);
-            }).fail(() => $target.html('<option value="">Gagal memuat produk</option>'));
-        }
-
-        function collectData(prefix) {
-            const p = prefix ? prefix + '_' : '';
-            return {
-                _token:      '{{ csrf_token() }}',
-                product_id:  $('#' + p + 'product_id').val(),
-                sku:         $('#' + p + 'sku').val().trim(),
-                color_id:    $('#' + p + 'color_id').val()    || null,
-                size_id:     $('#' + p + 'size_id').val()     || null,
-                material_id: $('#' + p + 'material_id').val() || null,
-                fit_id:      $('#' + p + 'fit_id').val()      || null,
-                sleeve_id:   $('#' + p + 'sleeve_id').val()   || null,
-                collar_id:   $('#' + p + 'collar_id').val()   || null,
-                pattern_id:  $('#' + p + 'pattern_id').val()  || null,
-                gender_id:   $('#' + p + 'gender_id').val()   || null,
-                unit_id:     $('#' + p + 'unit_id').val()     || null,
-                price:       $('#' + p + 'price').val(),
-                stock:       $('#' + p + 'stock').val(),
-            };
-        }
-
-        function validateData(data, prefix) {
-            const p = prefix ? prefix + '_' : '';
-            let valid = true;
-            if (!data.product_id) {
-                $('#' + p + 'product_id').addClass('is-invalid');
-                $('#' + p + 'product_id_err').text('Produk harus dipilih.');
-                valid = false;
-            } else { $('#' + p + 'product_id').removeClass('is-invalid'); }
-            if (!data.sku) {
-                $('#' + p + 'sku').addClass('is-invalid');
-                $('#' + p + 'sku_err').text('SKU tidak boleh kosong.');
-                valid = false;
-            } else { $('#' + p + 'sku').removeClass('is-invalid'); }
-            if (data.price === '' || data.price < 0) {
-                $('#' + p + 'price_err').text('Harga harus diisi.');
-                valid = false;
-            } else { $('#' + p + 'price_err').text(''); }
-            if (data.stock === '') {
-                $('#' + p + 'stock').addClass('is-invalid');
-                $('#' + p + 'stock_err').text('Stok harus diisi.');
-                valid = false;
-            } else { $('#' + p + 'stock').removeClass('is-invalid'); }
-            return valid;
-        }
-
+        /* ── CRUD ──────────────────────────────────────────────── */
         function save() {
-            const data = collectData('');
-            if (!validateData(data, '')) return;
+            if (!validateFields('')) return;
             setLoad('load');
             $.ajax({
-                url: '{{ route('product-variants.store') }}', method: 'POST', data: data,
+                url: '{{ route('product-variants.store') }}',
+                method: 'POST',
+                data: buildFormData(''),
+                processData: false,
+                contentType: false,
                 success: function (r) {
                     setLoad('close');
                     if (r.status === 'failed') { swalAlert('error', r.message); }
@@ -510,30 +665,49 @@
                 success: function (r) {
                     setLoad('close');
                     const d = r.data;
+
+                    /* basic fields */
                     const brandId = d.product?.brand_id ?? '';
                     $('#edit_brand_id').val(brandId);
-
-                    // Load products for brand, then set selected product
                     if (brandId) {
-                        $.get(PRODUCTS_BY_BRAND_URL.replace(':id', brandId), function (products) {
+                        $.get(PRODUCTS_BY_BRAND_URL.replace(':id', brandId), products => {
                             let opts = '<option value="">-- Pilih Produk --</option>';
                             products.forEach(p => { opts += `<option value="${p.id}">${p.product_name}</option>`; });
                             $('#edit_product_id').html(opts).val(d.product_id);
                         });
                     }
-
                     $('#edit_sku').val(d.sku);
-                    $('#edit_color_id').val(d.color_id   ?? '');
-                    $('#edit_size_id').val(d.size_id     ?? '');
+                    $('#edit_color_id').val(d.color_id     ?? '');
+                    $('#edit_size_id').val(d.size_id       ?? '');
                     $('#edit_material_id').val(d.material_id ?? '');
-                    $('#edit_fit_id').val(d.fit_id       ?? '');
-                    $('#edit_sleeve_id').val(d.sleeve_id ?? '');
-                    $('#edit_collar_id').val(d.collar_id ?? '');
+                    $('#edit_fit_id').val(d.fit_id         ?? '');
+                    $('#edit_sleeve_id').val(d.sleeve_id   ?? '');
+                    $('#edit_collar_id').val(d.collar_id   ?? '');
                     $('#edit_pattern_id').val(d.pattern_id ?? '');
-                    $('#edit_gender_id').val(d.gender_id ?? '');
-                    $('#edit_unit_id').val(d.unit_id     ?? '');
+                    $('#edit_gender_id').val(d.gender_id   ?? '');
+                    $('#edit_unit_id').val(d.unit_id       ?? '');
                     $('#edit_price').val(d.price);
                     $('#edit_stock').val(d.stock);
+
+                    /* existing images */
+                    const $wrap = $('#edit-existing-images').empty();
+                    if (d.images && d.images.length > 0) {
+                        d.images.forEach(img => {
+                            $wrap.append(`
+                                <div class="img-thumb-wrap" id="existing-img-${img.id}">
+                                    <img src="${img.url}" alt="">
+                                    ${img.is_primary ? '<span class="img-primary-badge">Utama</span>' : ''}
+                                    <button type="button" class="img-remove-btn"
+                                        onclick="deleteExistingImage('${img.encrypted_id}', ${img.id})"
+                                        title="Hapus gambar ini">×</button>
+                                </div>`);
+                        });
+                    } else {
+                        $wrap.html('<p class="text-muted small my-auto">Belum ada gambar</p>');
+                    }
+
+                    editPendingImages = [];
+                    $('#edit-image-preview-wrap').empty();
                     $('#editModal').modal('show');
                 },
                 error: function () { setLoad('close'); swalAlert('error', 'Terjadi kesalahan saat mengambil data'); }
@@ -541,13 +715,17 @@
         }
 
         function update() {
-            const data = collectData('edit');
-            if (!validateData(data, 'edit')) return;
+            if (!validateFields('edit')) return;
             const mvid = $('#mvid').val();
-            data._method = 'PUT';
+            const fd   = buildFormData('edit');
+            fd.append('_method', 'PUT');
             setLoad('load');
             $.ajax({
-                url: '{{ route('product-variants.update', ':id') }}'.replace(':id', mvid), method: 'POST', data: data,
+                url: '{{ route('product-variants.update', ':id') }}'.replace(':id', mvid),
+                method: 'POST',
+                data: fd,
+                processData: false,
+                contentType: false,
                 success: function (r) {
                     setLoad('close');
                     if (r.status === 'failed') { swalAlert('error', r.message); }
@@ -557,9 +735,36 @@
             });
         }
 
+        function deleteExistingImage(encryptedId, rawId) {
+            Swal.fire({
+                icon: 'warning', title: 'Hapus Gambar?',
+                text: 'Gambar akan dihapus permanen.',
+                showCancelButton: true,
+                confirmButtonColor: '#e3342f', cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Ya, Hapus!', cancelButtonText: 'Batal'
+            }).then(result => {
+                if (!result.isConfirmed) return;
+                $.ajax({
+                    url: DELETE_IMAGE_URL.replace(':id', encryptedId),
+                    method: 'POST',
+                    data: { _token: '{{ csrf_token() }}', _method: 'DELETE' },
+                    success: function (r) {
+                        if (r.status === 'success') {
+                            $(`#existing-img-${rawId}`).remove();
+                            if ($('#edit-existing-images').children().length === 0) {
+                                $('#edit-existing-images').html('<p class="text-muted small my-auto">Belum ada gambar</p>');
+                            }
+                        } else { swalAlert('error', r.message); }
+                    },
+                    error: function (xhr) { swalAlert('error', xhr.responseJSON?.message ?? 'Gagal menghapus gambar.'); }
+                });
+            });
+        }
+
         function delete_variant(id) {
             $.ajax({
-                url: '{{ route('product-variants.destroy', ':id') }}'.replace(':id', id), method: 'POST',
+                url: '{{ route('product-variants.destroy', ':id') }}'.replace(':id', id),
+                method: 'POST',
                 data: { _token: '{{ csrf_token() }}', _method: 'DELETE' },
                 success: function () { setLoad('close'); $('#product-variants-table').DataTable().ajax.reload(); swalAlert('success', 'Varian berhasil dihapus.'); },
                 error: function (xhr) { setLoad('close'); swalAlert('error', xhr.responseJSON?.message ?? 'Terjadi kesalahan.'); }
@@ -567,8 +772,55 @@
         }
 
         function confirmDelete(id) {
-            Swal.fire({ icon: 'warning', title: 'Hapus Varian?', text: 'Data yang dihapus tidak dapat dikembalikan!', showCancelButton: true, confirmButtonColor: '#e3342f', cancelButtonColor: '#6c757d', confirmButtonText: 'Ya, Hapus!', cancelButtonText: 'Batal' })
-                .then((r) => { if (r.isConfirmed) delete_variant(id); });
+            Swal.fire({
+                icon: 'warning', title: 'Hapus Varian?',
+                text: 'Semua gambar varian ini juga akan ikut terhapus!',
+                showCancelButton: true,
+                confirmButtonColor: '#e3342f', cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Ya, Hapus!', cancelButtonText: 'Batal'
+            }).then(r => { if (r.isConfirmed) delete_variant(id); });
+        }
+
+        /* ── Gallery viewer ────────────────────────────────────── */
+        function viewImages(encryptedId) {
+            const $gallery = $('#view-images-gallery');
+            $('#viewImagesModalTitle').html('<i class="fas fa-images text-primary mr-1"></i> Galeri Gambar Varian');
+            $gallery.html('<p class="text-muted small my-auto"><i class="fas fa-spinner fa-spin mr-1"></i> Memuat gambar...</p>');
+            $('#viewImagesModal').modal('show');
+
+            $.ajax({
+                url: '{{ route('product-variants.edit', ':id') }}'.replace(':id', encryptedId),
+                method: 'GET',
+                dataType: 'json',
+                success: function (r) {
+                    const d      = r.data;
+                    const images = d.images ?? [];
+
+                    $('#viewImagesModalTitle').html(
+                        '<i class="fas fa-images text-primary mr-1"></i> Galeri Gambar — <span class="text-secondary">' + (d.sku ?? '') + '</span>'
+                    );
+
+                    $gallery.empty();
+
+                    if (images.length === 0) {
+                        $gallery.html('<div class="w-100 text-center py-4 text-muted"><i class="fas fa-image fa-2x mb-2 d-block"></i>Varian ini belum memiliki gambar.</div>');
+                        return;
+                    }
+
+                    images.forEach(function (img) {
+                        $gallery.append(
+                            '<div class="gallery-item" onclick="window.open(\'' + img.url + '\', \'_blank\')" title="Buka gambar penuh">' +
+                                '<img src="' + img.url + '" alt="">' +
+                                (img.is_primary ? '<span class="gallery-primary-badge">Utama</span>' : '') +
+                                '<div class="gallery-overlay"><i class="fas fa-search-plus"></i></div>' +
+                            '</div>'
+                        );
+                    });
+                },
+                error: function () {
+                    $gallery.html('<p class="text-danger small my-auto"><i class="fas fa-exclamation-circle mr-1"></i>Gagal memuat gambar.</p>');
+                }
+            });
         }
     </script>
 @endpush

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ProductVariant extends Model
 {
@@ -27,4 +28,9 @@ class ProductVariant extends Model
     public function pattern(): BelongsTo { return $this->belongsTo(Pattern::class); }
     public function gender(): BelongsTo  { return $this->belongsTo(Gender::class); }
     public function unit(): BelongsTo    { return $this->belongsTo(Unit::class); }
+
+    public function images(): HasMany
+    {
+        return $this->hasMany(ProductVariantImage::class)->orderBy('sort_order')->orderBy('id');
+    }
 }

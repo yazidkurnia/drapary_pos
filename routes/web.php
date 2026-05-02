@@ -76,6 +76,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/products/by-brand/{brandId}', [ManageProductsController::class, 'byBrand'])->name('products.by-brand');
         Route::resource('/products', ManageProductsController::class)->except(['show', 'create']);
         Route::resource('/product-variants', ManageProductVariantsController::class)->except(['show', 'create']);
+        Route::delete('/product-variant-images/{imageId}', [ManageProductVariantsController::class, 'destroyImage'])->name('product-variant-images.destroy');
     });
 
     // Role Management - hanya Owner
