@@ -40,24 +40,14 @@ Route::middleware('auth')->group(function () {
 
     // Point of Sale
     Route::get('/pos', function () {
-        $products = [
-            [
-                'name'        => 'Kain Sutra',
-                'description' => 'Kain sutra asli kualitas premium.',
-                'image'       => 'https://placehold.co/600x400/f06292/white?text=Kain',
-            ],
-            [
-                'name'        => 'Benang Wol',
-                'description' => 'Benang wol tebal untuk rajutan.',
-                'image'       => 'https://placehold.co/600x400/4fc3f7/white?text=Benang',
-            ],
-            [
-                'name'        => 'Kancing Kayu',
-                'description' => 'Kancing estetik bahan kayu.',
-                'image'       => 'https://placehold.co/600x400/a1887f/white?text=Kancing',
-            ],
-        ];
-        return view('pages.pos.index', compact('products'));
+        $products = \App\Models\Product::with([
+            'brand',
+            'variants' => fn($q) => $q->with(['images', 'color', 'size']),
+        ])->get();
+
+        $brands = \App\Models\Brand::orderBy('brand_name')->get();
+
+        return view('pages.pos.index', compact('products', 'brands'));
     })->name('pos');
 
     // User Management - hanya Owner & Admin Ecommerce
