@@ -441,6 +441,172 @@
     <span class="mobile-fab-badge" id="mobileFabBadge">0</span>
 </button>
 
+{{-- ── Modal Checkout ─────────────────────────────────────────── --}}
+<div class="modal fade" id="checkoutModal" tabindex="-1" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+
+            {{-- PANEL 1: Konfirmasi Pembayaran --}}
+            <div id="checkoutPanel">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-cash-register text-primary mr-2"></i>Konfirmasi Pembayaran
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                </div>
+                <div class="modal-body" style="max-height:75vh;overflow-y:auto;">
+
+                    {{-- Daftar item --}}
+                    <div class="mb-3">
+                        <p class="text-muted small mb-2 font-weight-600 text-uppercase" style="letter-spacing:.4px;">
+                            <i class="fas fa-list mr-1"></i> Item Pesanan
+                        </p>
+                        <div id="co-item-list" class="checkout-item-list"></div>
+                    </div>
+
+                    {{-- Ringkasan harga --}}
+                    <div class="checkout-summary-box">
+                        <div class="d-flex justify-content-between co-summary-row">
+                            <span class="text-muted">Subtotal</span>
+                            <span id="co-subtotal">Rp 0</span>
+                        </div>
+                        <div class="d-flex justify-content-between co-summary-row">
+                            <span class="text-muted">PPN (11%)</span>
+                            <span id="co-tax">Rp 0</span>
+                        </div>
+                        <div class="d-flex justify-content-between co-summary-row" id="co-discount-row" style="display:none!important;">
+                            <span class="text-success">Diskon</span>
+                            <span class="text-success font-weight-bold" id="co-discount">-Rp 0</span>
+                        </div>
+                        <hr class="my-2">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="font-weight-bold" style="font-size:.95rem;">Total</span>
+                            <span class="font-weight-bold text-primary" style="font-size:1.2rem;" id="co-total">Rp 0</span>
+                        </div>
+                    </div>
+
+                    {{-- Metode Pembayaran --}}
+                    <div class="mt-3 mb-3">
+                        <p class="text-muted small mb-2 font-weight-600 text-uppercase" style="letter-spacing:.4px;">
+                            <i class="fas fa-wallet mr-1"></i> Metode Pembayaran
+                        </p>
+                        <div class="d-flex" style="gap:8px;">
+                            <button class="btn btn-sm co-pay-btn active" data-method="cash">
+                                <i class="fas fa-money-bill-wave mr-1"></i> Tunai
+                            </button>
+                            <button class="btn btn-sm co-pay-btn" data-method="transfer">
+                                <i class="fas fa-university mr-1"></i> Transfer
+                            </button>
+                            <button class="btn btn-sm co-pay-btn" data-method="qris">
+                                <i class="fas fa-qrcode mr-1"></i> QRIS
+                            </button>
+                            <button class="btn btn-sm co-pay-btn" data-method="card">
+                                <i class="fas fa-credit-card mr-1"></i> Kartu
+                            </button>
+                        </div>
+                    </div>
+
+                    {{-- Input uang tunai (hanya muncul jika metode = cash) --}}
+                    <div id="cashInputSection">
+                        <div class="form-group mb-2">
+                            <label class="small font-weight-bold">Uang Diterima</label>
+                            <div class="input-group">
+                                <div class="input-group-prepend"><span class="input-group-text">Rp</span></div>
+                                <input type="number" id="coAmountPaid" class="form-control" placeholder="0" min="0">
+                            </div>
+                        </div>
+                        {{-- Tombol nominal cepat --}}
+                        <div class="d-flex flex-wrap mb-3" style="gap:6px;" id="quickCashBtns"></div>
+                        {{-- Kembalian --}}
+                        <div class="change-display" id="changeDisplay" style="display:none;">
+                            <span class="text-muted small">Kembalian</span>
+                            <span class="font-weight-bold text-success" style="font-size:1.1rem;" id="changeAmount">Rp 0</span>
+                        </div>
+                        <div class="text-danger small" id="cashError" style="display:none;">
+                            <i class="fas fa-exclamation-circle mr-1"></i> Uang tidak mencukupi
+                        </div>
+                    </div>
+
+                    {{-- Pelanggan & Catatan --}}
+                    <div class="form-group mb-2">
+                        <label class="small font-weight-bold">Nama Pelanggan <span class="text-muted font-weight-normal">(opsional)</span></label>
+                        <input type="text" id="coCustomerName" class="form-control form-control-sm" placeholder="Pelanggan Umum">
+                    </div>
+                    <div class="form-group mb-0">
+                        <label class="small font-weight-bold">Catatan <span class="text-muted font-weight-normal">(opsional)</span></label>
+                        <input type="text" id="coNotes" class="form-control form-control-sm" placeholder="Tambahkan catatan...">
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-dismiss="modal">
+                        <i class="fas fa-times mr-1"></i> Batal
+                    </button>
+                    <button type="button" class="btn btn-success btn-lg px-4" id="confirmPayBtn">
+                        <i class="fas fa-check-circle mr-2"></i> Bayar Sekarang
+                    </button>
+                </div>
+            </div>{{-- /checkoutPanel --}}
+
+            {{-- PANEL 2: Sukses + Struk --}}
+            <div id="receiptPanel" style="display:none;">
+                <div class="modal-header border-0 pb-0">
+                    <button type="button" class="close ml-auto" data-dismiss="modal"><span>&times;</span></button>
+                </div>
+                <div class="modal-body pt-0">
+                    {{-- Animasi sukses --}}
+                    <div class="text-center mb-3">
+                        <div class="checkout-success-icon mx-auto mb-2">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <h5 class="font-weight-bold text-success mb-0">Pembayaran Berhasil!</h5>
+                        <p class="text-muted small" id="receiptOrderNum"></p>
+                    </div>
+
+                    {{-- Struk --}}
+                    <div id="receiptContent" class="receipt-box">
+                        <div class="receipt-header text-center">
+                            <div class="receipt-store-name">{{ config('app.name') }}</div>
+                            <div class="receipt-sub">Point of Sale</div>
+                            <div class="receipt-sub" id="rOrderNum"></div>
+                            <div class="receipt-sub" id="rDate"></div>
+                            <div class="receipt-sub" id="rCashier"></div>
+                            <div class="receipt-divider">- - - - - - - - - - - - - - -</div>
+                        </div>
+                        <div id="rItems" class="receipt-items"></div>
+                        <div class="receipt-divider">- - - - - - - - - - - - - - -</div>
+                        <div class="receipt-row"><span>Subtotal</span><span id="rSubtotal"></span></div>
+                        <div class="receipt-row"><span>PPN 11%</span><span id="rTax"></span></div>
+                        <div class="receipt-row receipt-row-discount" id="rDiscountRow" style="display:none;">
+                            <span>Diskon</span><span id="rDiscount"></span>
+                        </div>
+                        <div class="receipt-divider">- - - - - - - - - - - - - - -</div>
+                        <div class="receipt-row receipt-total"><span>TOTAL</span><span id="rTotal"></span></div>
+                        <div class="receipt-row"><span>Bayar (<span id="rMethod"></span>)</span><span id="rPaid"></span></div>
+                        <div class="receipt-row receipt-change" id="rChangeRow">
+                            <span>Kembalian</span><span id="rChange"></span>
+                        </div>
+                        <div class="receipt-divider">- - - - - - - - - - - - - - -</div>
+                        <div class="receipt-footer text-center">
+                            <div>Terima kasih telah berbelanja!</div>
+                            <div class="receipt-sub">Barang yang sudah dibeli tidak dapat dikembalikan</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0 d-flex justify-content-center" style="gap:10px;">
+                    <button type="button" class="btn btn-outline-secondary" onclick="printReceipt()">
+                        <i class="fas fa-print mr-1"></i> Cetak Struk
+                    </button>
+                    <button type="button" class="btn btn-primary" id="newTransactionBtn">
+                        <i class="fas fa-plus-circle mr-1"></i> Transaksi Baru
+                    </button>
+                </div>
+            </div>{{-- /receiptPanel --}}
+
+        </div>
+    </div>
+</div>{{-- /checkoutModal --}}
+
 @endsection
 
 @push('style')
@@ -450,6 +616,96 @@
        POS — Custom styles
        (hanya untuk hal yang tidak tersedia di Stisla/Bootstrap 4)
        ============================================================ */
+
+    /* ─── Checkout Modal ─────────────────────────────────────── */
+    .checkout-item-list { max-height: 200px; overflow-y: auto; }
+    .checkout-item-row {
+        display: flex; justify-content: space-between; align-items: flex-start;
+        padding: 6px 0; border-bottom: 1px solid #f0f1f7; font-size: .83rem;
+    }
+    .checkout-item-row:last-child { border-bottom: none; }
+    .checkout-item-name { font-weight: 600; color: #374151; }
+    .checkout-item-sub  { font-size: .73rem; color: #9ca3af; }
+    .checkout-item-price { font-weight: 700; color: #6777ef; white-space: nowrap; margin-left: 8px; }
+
+    .checkout-summary-box {
+        background: #f8f9ff; border: 1px solid #e4e6fc;
+        border-radius: 10px; padding: 12px 14px;
+    }
+    .co-summary-row { font-size: .82rem; margin-bottom: 4px; }
+
+    /* Metode bayar buttons di checkout */
+    .co-pay-btn {
+        border: 1.5px solid #dee2e6; background: #fff;
+        color: #6c757d; border-radius: 8px; font-size: .78rem;
+        transition: all .15s;
+    }
+    .co-pay-btn:hover  { border-color: #6777ef; color: #6777ef; }
+    .co-pay-btn.active {
+        background: #6777ef; border-color: #6777ef;
+        color: #fff; box-shadow: 0 3px 10px rgba(103,119,239,.3);
+    }
+
+    /* Kembalian */
+    .change-display {
+        display: flex; justify-content: space-between; align-items: center;
+        background: #f0fff4; border: 1px solid #d1fae5;
+        border-radius: 8px; padding: 10px 14px; margin-top: 8px;
+    }
+
+    /* Quick cash buttons */
+    .quick-cash-btn {
+        padding: 4px 10px; border: 1px solid #e4e6fc;
+        background: #f5f6ff; color: #6777ef;
+        border-radius: 6px; font-size: .75rem; font-weight: 600;
+        cursor: pointer; transition: all .15s;
+    }
+    .quick-cash-btn:hover { background: #6777ef; color: #fff; border-color: #6777ef; }
+
+    /* Sukses icon */
+    .checkout-success-icon {
+        width: 64px; height: 64px; border-radius: 50%;
+        background: linear-gradient(135deg, #47c363, #34d058);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.8rem; color: #fff;
+        box-shadow: 0 6px 20px rgba(71,195,99,.4);
+        animation: popIn .4s cubic-bezier(.34,1.56,.64,1);
+    }
+    @keyframes popIn {
+        from { transform: scale(0); opacity: 0; }
+        to   { transform: scale(1); opacity: 1; }
+    }
+
+    /* ─── Struk / Receipt ────────────────────────────────────── */
+    .receipt-box {
+        font-family: 'Courier New', monospace;
+        font-size: .78rem;
+        background: #fff;
+        border: 1px dashed #dee2e6;
+        border-radius: 8px;
+        padding: 16px;
+        max-width: 300px;
+        margin: 0 auto;
+    }
+    .receipt-store-name { font-size: 1rem; font-weight: 700; margin-bottom: 2px; }
+    .receipt-sub        { font-size: .72rem; color: #6c757d; }
+    .receipt-divider    { color: #9ca3af; margin: 6px 0; text-align: center; letter-spacing: 2px; }
+    .receipt-row        { display: flex; justify-content: space-between; margin: 3px 0; }
+    .receipt-total      { font-weight: 700; font-size: .9rem; }
+    .receipt-change     { font-weight: 700; color: #47c363; }
+    .receipt-row-discount { color: #47c363; }
+    .receipt-items      { margin: 4px 0; }
+    .receipt-item-row   { margin-bottom: 4px; }
+    .receipt-item-name  { font-weight: 600; }
+    .receipt-item-detail{ color: #6c757d; font-size: .72rem; }
+    .receipt-footer     { font-size: .7rem; color: #9ca3af; margin-top: 4px; }
+
+    /* Print */
+    @media print {
+        body > *           { display: none !important; }
+        #printArea         { display: block !important; }
+        #printArea .receipt-box { border: none; max-width: 100%; }
+    }
 
     /* ----- Layout Utama ----- */
     .pos-wrapper {
@@ -1571,21 +1827,286 @@ $(document).ready(function () {
         }).addClass('col-12 mb-4 product-col');
     });
 
-    // Checkout
-    $('#checkoutBtn').on('click', function () {
+    /* ============================================================
+       CHECKOUT MODAL
+    ============================================================ */
+    const CHECKOUT_URL   = '{{ route('pos.checkout') }}';
+    const ORDER_SHOW_URL = '{{ route('pos.orders.show', ':id') }}';
+
+    let checkoutState = {};  // menyimpan data yang akan dikirim
+
+    function openCheckoutModal() {
         if (!cart.length) return;
-        const sub    = cart.reduce((s, i) => s + i.price * i.qty, 0);
-        const total  = Math.max(0, sub * (1 + TAX_RATE) - activeDiscount);
-        const method = $('.pay-method.active').data('method') || 'cash';
-        const payload = { cart, total, method };
 
-        console.log('Checkout →', payload);
+        const sub      = cart.reduce((s, i) => s + i.price * i.qty, 0);
+        const tax      = sub * TAX_RATE;
+        const total    = Math.max(0, sub + tax - activeDiscount);
+        const method   = $('.pay-method.active').data('method') || 'cash';
 
-        // → Ganti dengan AJAX ke controller:
-        // $.post('/pos/checkout', payload, ...)
+        checkoutState = { sub, tax, total, method };
 
-        toast('success', `Pembayaran ${fmt(total)} via ${method.toUpperCase()} berhasil!`);
+        /* ── Render item list ── */
+        const $list = $('#co-item-list').empty();
+        cart.forEach(item => {
+            $list.append(`
+                <div class="checkout-item-row">
+                    <div>
+                        <div class="checkout-item-name">${item.name}</div>
+                        <div class="checkout-item-sub">${item.label} &nbsp;×${item.qty}</div>
+                    </div>
+                    <div class="checkout-item-price">${fmt(item.price * item.qty)}</div>
+                </div>`);
+        });
+
+        /* ── Summary ── */
+        $('#co-subtotal').text(fmt(sub));
+        $('#co-tax').text(fmt(tax));
+        $('#co-total').text(fmt(total));
+        if (activeDiscount > 0) {
+            $('#co-discount').text('-' + fmt(activeDiscount));
+            $('#co-discount-row').css('display', 'flex');
+        } else {
+            $('#co-discount-row').hide();
+        }
+
+        /* ── Sync metode bayar dari cart panel ── */
+        $('.co-pay-btn').removeClass('active');
+        $(`.co-pay-btn[data-method="${method}"]`).addClass('active');
+        toggleCashSection(method);
+
+        /* ── Quick cash buttons ── */
+        buildQuickCashBtns(total);
+
+        /* ── Reset input ── */
+        $('#coAmountPaid').val('');
+        $('#changeDisplay, #cashError').hide();
+        $('#coCustomerName, #coNotes').val('');
+
+        /* ── Show confirmation panel ── */
+        $('#checkoutPanel').show();
+        $('#receiptPanel').hide();
+        $('#checkoutModal').modal('show');
+    }
+
+    function toggleCashSection(method) {
+        if (method === 'cash') {
+            $('#cashInputSection').show();
+        } else {
+            $('#cashInputSection').hide();
+        }
+    }
+
+    function buildQuickCashBtns(total) {
+        const denominations = [total, 50000, 100000, 200000, 500000, 1000000];
+        const unique = [...new Set(denominations.map(d => Math.ceil(d / 10000) * 10000))]
+            .filter(d => d >= total)
+            .sort((a, b) => a - b)
+            .slice(0, 4);
+
+        const $btns = $('#quickCashBtns').empty();
+        unique.forEach(d => {
+            $btns.append(
+                `<button class="quick-cash-btn" onclick="setQuickCash(${d})">${fmt(d)}</button>`
+            );
+        });
+    }
+
+    function setQuickCash(amount) {
+        $('#coAmountPaid').val(amount).trigger('input');
+    }
+
+    /* Hitung kembalian real-time */
+    $('#coAmountPaid').on('input', function () {
+        const paid  = parseFloat($(this).val()) || 0;
+        const total = checkoutState.total || 0;
+        const change = paid - total;
+
+        if (!paid) { $('#changeDisplay, #cashError').hide(); return; }
+
+        if (change < 0) {
+            $('#changeDisplay').hide();
+            $('#cashError').show();
+        } else {
+            $('#cashError').hide();
+            $('#changeAmount').text(fmt(change));
+            $('#changeDisplay').show();
+        }
     });
+
+    /* Pilih metode bayar di modal */
+    $(document).on('click', '.co-pay-btn', function () {
+        $('.co-pay-btn').removeClass('active');
+        $(this).addClass('active');
+        const method = $(this).data('method');
+        checkoutState.method = method;
+        toggleCashSection(method);
+    });
+
+    /* Konfirmasi bayar */
+    $('#confirmPayBtn').on('click', function () {
+        const method = checkoutState.method;
+        const total  = checkoutState.total;
+        let amountPaid  = parseFloat($('#coAmountPaid').val()) || 0;
+        let changeAmount = 0;
+
+        if (method === 'cash') {
+            if (amountPaid < total) {
+                $('#cashError').show();
+                $('#coAmountPaid').focus();
+                return;
+            }
+            changeAmount = amountPaid - total;
+        } else {
+            amountPaid   = total;
+            changeAmount = 0;
+        }
+
+        const payload = {
+            _token:         '{{ csrf_token() }}',
+            cart:           cart.map(i => ({
+                pid:      i.pid,
+                vid:      i.vid,
+                sizeId:   i.sizeId,
+                name:     i.name,
+                label:    i.label,
+                sizeName: i.label.split(' / ').pop(),
+                sku:      i.sku,
+                price:    i.price,
+                qty:      i.qty,
+            })),
+            subtotal:       checkoutState.sub,
+            tax:            checkoutState.tax,
+            discount:       activeDiscount,
+            total:          total,
+            payment_method: method,
+            amount_paid:    amountPaid,
+            change_amount:  changeAmount,
+            customer_name:  $('#coCustomerName').val().trim() || null,
+            notes:          $('#coNotes').val().trim() || null,
+        };
+
+        const $btn = $(this);
+        $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Memproses...');
+
+        $.ajax({
+            url:         CHECKOUT_URL,
+            method:      'POST',
+            contentType: 'application/json',
+            data:        JSON.stringify(payload),
+            success: function (r) {
+                $btn.prop('disabled', false).html('<i class="fas fa-check-circle mr-2"></i> Bayar Sekarang');
+                if (r.status !== 'success') { toast('error', r.message); return; }
+
+                /* Fetch order detail untuk struk */
+                $.get(ORDER_SHOW_URL.replace(':id', r.order_id), function (res) {
+                    renderReceipt(res.data, {
+                        sub: checkoutState.sub, tax: checkoutState.tax,
+                        discount: activeDiscount, total,
+                        method, amountPaid, changeAmount,
+                    });
+                });
+
+                /* Reset cart */
+                clearCart();
+                closeCartDrawer();
+            },
+            error: function (xhr) {
+                $btn.prop('disabled', false).html('<i class="fas fa-check-circle mr-2"></i> Bayar Sekarang');
+                const msg = xhr.responseJSON?.message ?? 'Terjadi kesalahan.';
+                toast('error', msg);
+            },
+        });
+    });
+
+    /* Tombol transaksi baru */
+    $('#newTransactionBtn').on('click', function () {
+        $('#checkoutModal').modal('hide');
+    });
+
+    /* Buka checkout dari tombol cart */
+    $('#checkoutBtn').on('click', openCheckoutModal);
+
+    /* ============================================================
+       RENDER STRUK + PRINT
+    ============================================================ */
+    const METHOD_LABEL = { cash: 'Tunai', transfer: 'Transfer', qris: 'QRIS', card: 'Kartu' };
+
+    function renderReceipt(order, summary) {
+        /* Header */
+        $('#rOrderNum').text('No: ' + order.order_number);
+        $('#rDate').text(new Date(order.created_at).toLocaleString('id-ID'));
+        $('#rCashier').text('Kasir: ' + (order.cashier?.name ?? '-'));
+
+        /* Items */
+        const $items = $('#rItems').empty();
+        (order.items ?? []).forEach(item => {
+            $items.append(`
+                <div class="receipt-item-row">
+                    <div class="receipt-item-name">${item.product_name}</div>
+                    <div class="receipt-item-detail">${item.variant_label} / ${item.size_name}</div>
+                    <div class="d-flex justify-content-between">
+                        <span>${item.qty} × ${fmt(item.unit_price)}</span>
+                        <span>${fmt(item.subtotal)}</span>
+                    </div>
+                </div>`);
+        });
+
+        /* Summary */
+        $('#rSubtotal').text(fmt(summary.sub));
+        $('#rTax').text(fmt(summary.tax));
+        $('#rTotal').text(fmt(summary.total));
+        $('#rMethod').text(METHOD_LABEL[summary.method] ?? summary.method);
+        $('#rPaid').text(fmt(summary.amountPaid));
+
+        if (summary.discount > 0) {
+            $('#rDiscount').text('-' + fmt(summary.discount));
+            $('#rDiscountRow').show();
+        } else {
+            $('#rDiscountRow').hide();
+        }
+        if (summary.method === 'cash') {
+            $('#rChange').text(fmt(summary.changeAmount));
+            $('#rChangeRow').show();
+        } else {
+            $('#rChangeRow').hide();
+        }
+
+        /* Header success panel */
+        $('#receiptOrderNum').text(order.order_number);
+
+        /* Tampilkan receipt panel */
+        $('#checkoutPanel').hide();
+        $('#receiptPanel').show();
+    }
+
+    function printReceipt() {
+        const receiptHtml = $('#receiptContent').html();
+        const win = window.open('', '_blank', 'width=400,height=600');
+        win.document.write(`
+            <!DOCTYPE html><html><head>
+            <meta charset="UTF-8">
+            <title>Struk</title>
+            <style>
+                body { font-family: 'Courier New', monospace; font-size: 12px; padding: 10px; }
+                .receipt-store-name { font-size:14px; font-weight:700; }
+                .receipt-sub  { font-size:11px; color:#666; }
+                .receipt-divider { text-align:center; letter-spacing:2px; margin:5px 0; color:#999; }
+                .receipt-row  { display:flex; justify-content:space-between; margin:3px 0; }
+                .receipt-total { font-weight:700; font-size:13px; }
+                .receipt-change { font-weight:700; color:#2d7a2d; }
+                .receipt-row-discount { color:#2d7a2d; }
+                .receipt-item-row { margin-bottom:5px; }
+                .receipt-item-name { font-weight:600; }
+                .receipt-item-detail { font-size:10px; color:#666; }
+                .d-flex { display:flex; justify-content:space-between; }
+                .receipt-footer { font-size:10px; color:#999; margin-top:5px; }
+                .text-center { text-align:center; }
+            </style></head><body>
+            ${receiptHtml}
+            <script>window.onload=function(){window.print();window.close();}<\/script>
+            </body></html>`);
+        win.document.close();
+    }
 
     /* ============================================================
        MOBILE CART DRAWER
@@ -1627,6 +2148,10 @@ $(document).ready(function () {
             filterProducts();
         },
     };
+
+    /* Fungsi yang dipanggil via onclick inline — harus global */
+    window.printReceipt = printReceipt;
+    window.setQuickCash = setQuickCash;
 
 });
 </script>

@@ -39,6 +39,9 @@ Route::middleware('auth')->group(function () {
     })->name('dashboard');
 
     // Point of Sale
+    Route::post('/pos/checkout', [\App\Http\Controllers\Pos\OrderController::class, 'store'])->name('pos.checkout');
+    Route::get('/pos/orders/{order}', [\App\Http\Controllers\Pos\OrderController::class, 'show'])->name('pos.orders.show');
+
     Route::get('/pos', function () {
         $products = \App\Models\Product::with([
             'brand',
