@@ -11,12 +11,13 @@
             <li>
                 <a class="nav-link" href="{{ url('dashboard') }}"><i class="fas fa-fire"></i> <span>Overview</span></a>
             </li>
-            <li class="dropdown {{ request()->is('pos*') ? 'active' : '' }}">
+            <li class="dropdown {{ request()->is('pos*', 'transactions*') ? 'active' : '' }}">
                 <a href="#" class="nav-link has-dropdown"><i class="fas fa-clipboard-list"></i> <span>Order</span></a>
                 <ul class="dropdown-menu">
-                    <li><a class="nav-link" href="{{ url('pos') }}"><i class="fas fa-plus-circle"></i> New Order</a></li>
-                    <li><a class="nav-link" href="#"><i class="fas fa-clipboard-list"></i> Order List</a></li>
-                    <li><a class="nav-link" href="#"><i class="fas fa-history"></i> Transaction</a></li>
+                    <li><a class="nav-link {{ request()->is('pos') ? 'active' : '' }}" href="{{ url('pos') }}">
+                        <i class="fas fa-plus-circle"></i> New Order</a></li>
+                    <li><a class="nav-link {{ request()->is('transactions*') ? 'active' : '' }}" href="{{ route('transactions.index') }}">
+                        <i class="fas fa-history"></i> Transaction</a></li>
                 </ul>
             </li>
 

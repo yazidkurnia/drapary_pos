@@ -38,10 +38,9 @@ Route::middleware('auth')->group(function () {
         return view('pages.overview.index');
     })->name('dashboard');
 
-    // Point of Sale
     Route::post('/pos/checkout', [\App\Http\Controllers\Pos\OrderController::class, 'store'])->name('pos.checkout');
     Route::get('/pos/orders/{order}', [\App\Http\Controllers\Pos\OrderController::class, 'show'])->name('pos.orders.show');
-
+    // Point of Sale
     Route::get('/pos', function () {
         $products = \App\Models\Product::with([
             'brand',
@@ -52,6 +51,14 @@ Route::middleware('auth')->group(function () {
 
         return view('pages.pos.index', compact('products', 'brands'));
     })->name('pos');
+
+    // Transactions
+    Route::prefix('transactions')->name('transactions.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Pos\TransactionController::class, 'index'])->name('index');
+        Route::get('/data', [\App\Http\Controllers\Pos\TransactionController::class, 'data'])->name('data');
+        Route::get('/summary', [\App\Http\Controllers\Pos\TransactionController::class, 'summary'])->name('summary');
+        Route::get('/{order}', [\App\Http\Controllers\Pos\TransactionController::class, 'show'])->name('show');
+    });
 
     // User Management - hanya Owner & Admin Ecommerce
     Route::middleware('role:Owner|Admin Ecommerce')->group(function () {
