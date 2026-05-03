@@ -42,7 +42,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/pos', function () {
         $products = \App\Models\Product::with([
             'brand',
-            'variants' => fn($q) => $q->with(['images', 'color', 'size']),
+            'variants' => fn($q) => $q->with(['images', 'color', 'sizeStocks.size']),
         ])->get();
 
         $brands = \App\Models\Brand::orderBy('brand_name')->get();

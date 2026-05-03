@@ -4,6 +4,7 @@ namespace App\Modules\ManageProductVariants\Application\Services;
 
 use App\Models\ProductVariant;
 use App\Models\ProductVariantImage;
+use App\Models\VariantSizeStock;
 use App\Modules\ManageProductVariants\Application\DTOs\ProductVariantDTO;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -43,7 +44,7 @@ class ManageProductVariantService
             throw new \InvalidArgumentException('Data varian tidak ditemukan!');
         }
 
-        $variant->load(['product.brand', 'color', 'size', 'material', 'fit', 'sleeve', 'collar', 'pattern', 'gender', 'unit', 'images']);
+        $variant->load(['product.brand', 'color', 'material', 'fit', 'sleeve', 'collar', 'pattern', 'gender', 'unit', 'images', 'sizeStocks.size']);
         $variant->mvid = Crypt::encryptString($variant->id);
 
         $variant->images->each(function ($img) {
@@ -70,6 +71,20 @@ class ManageProductVariantService
         }
 
         return $this->updateVariantUsecase->update_usecase($dto, $id);
+    }
+
+    /** Simpan / perbarui size stocks — hapus yang lama lalu insert ulang */
+    public function sync_size_stocks(ProductVariant $variant, array $sizeStocks): void
+    {
+        $variant->sizeStocks()->delete();
+
+        foreach ($sizeStocks as $row) {
+            VariantSizeStock::create([
+                'product_variant_id' => $variant->id,
+                'size_id'            => $row['size_id'],
+                'stock'              => $row['stock'],
+            ]);
+        }
     }
 
     /** @param UploadedFile[] $images */

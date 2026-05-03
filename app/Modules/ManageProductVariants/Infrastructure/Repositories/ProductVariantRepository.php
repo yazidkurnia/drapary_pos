@@ -24,7 +24,6 @@ class ProductVariantRepository implements ManageProductVariantRepositoryInterfac
             'product_id'  => $dto->productId,
             'sku'         => $dto->sku,
             'color_id'    => $dto->colorId,
-            'size_id'     => $dto->sizeId,
             'material_id' => $dto->materialId,
             'fit_id'      => $dto->fitId,
             'sleeve_id'   => $dto->sleeveId,
@@ -33,7 +32,6 @@ class ProductVariantRepository implements ManageProductVariantRepositoryInterfac
             'gender_id'   => $dto->genderId,
             'unit_id'     => $dto->unitId,
             'price'       => $dto->price,
-            'stock'       => $dto->stock,
         ]);
     }
 
@@ -43,7 +41,6 @@ class ProductVariantRepository implements ManageProductVariantRepositoryInterfac
         $variant->product_id  = $dto->productId;
         $variant->sku         = $dto->sku;
         $variant->color_id    = $dto->colorId;
-        $variant->size_id     = $dto->sizeId;
         $variant->material_id = $dto->materialId;
         $variant->fit_id      = $dto->fitId;
         $variant->sleeve_id   = $dto->sleeveId;
@@ -52,7 +49,6 @@ class ProductVariantRepository implements ManageProductVariantRepositoryInterfac
         $variant->gender_id   = $dto->genderId;
         $variant->unit_id     = $dto->unitId;
         $variant->price       = $dto->price;
-        $variant->stock       = $dto->stock;
         $variant->save();
 
         return $variant;

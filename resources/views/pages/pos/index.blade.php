@@ -77,8 +77,8 @@
                 }
                 $heroImg = $heroImg ?? 'https://placehold.co/600x400/e4e6fc/6777ef?text=No+Image';
 
-                /* Stok & harga dari varian pertama */
-                $firstStock = $firstVar?->stock ?? 0;
+                /* Stok & harga dari varian pertama (total dari semua ukuran) */
+                $firstStock = $firstVar ? $firstVar->sizeStocks->sum('stock') : 0;
                 $firstPrice = $firstVar?->price ?? 0;
                 $firstSku   = $firstVar?->sku   ?? '-';
 
@@ -86,15 +86,21 @@
                 $variantsJson = $variants->map(function ($v) {
                     $img    = $v->images->firstWhere('is_primary', 1) ?? $v->images->first();
                     $imgUrl = $img ? Storage::url($img->image_path) : null;
-                    $label  = collect([$v->color?->color_name, $v->size?->size_name])
-                                ->filter()->join(' / ') ?: $v->sku;
+                    $label  = $v->color?->color_name ?? $v->sku;
+
+                    $sizes  = $v->sizeStocks->map(fn($ss) => [
+                        'id'    => $ss->size_id,
+                        'name'  => $ss->size?->size_name ?? '-',
+                        'stock' => $ss->stock,
+                    ])->values()->toArray();
+
                     return [
                         'id'        => $v->id,
                         'sku'       => $v->sku,
                         'price'     => (float) $v->price,
-                        'stock'     => $v->stock,
                         'label'     => $label,
                         'image_url' => $imgUrl,
+                        'sizes'     => $sizes,
                     ];
                 })->values()->toArray();
             @endphp
@@ -159,19 +165,20 @@
 
                         {{-- Varian Thumbnails --}}
                         @if ($variants->isNotEmpty())
-                            <div class="variant-thumb-row mb-3">
+                            {{-- Thumbnail varian (warna/style) --}}
+                            <div class="variant-thumb-row mb-2">
                                 @foreach ($variants as $vIdx => $variant)
                                 @php
                                     $vImg    = $variant->images->firstWhere('is_primary', 1) ?? $variant->images->first();
                                     $vImgUrl = $vImg ? Storage::url($vImg->image_path) : null;
-                                    $vLabel  = collect([$variant->color?->color_name, $variant->size?->size_name])
-                                                 ->filter()->join(' / ') ?: $variant->sku;
+                                    $vLabel  = $variant->color?->color_name ?? $variant->sku;
+                                    $vTotal  = $variant->sizeStocks->sum('stock');
                                 @endphp
                                 <button type="button"
                                         class="variant-thumb {{ $vIdx === 0 ? 'selected' : '' }}"
                                         data-variant-index="{{ $vIdx }}"
                                         title="{{ $vLabel }} — Rp {{ number_format($variant->price, 0, ',', '.') }}"
-                                        {{ $variant->stock === 0 ? 'data-sold-out=1' : '' }}>
+                                        {{ $vTotal === 0 ? 'data-sold-out=1' : '' }}>
                                     @if ($vImgUrl)
                                         <img src="{{ $vImgUrl }}" alt="{{ $vLabel }}" loading="lazy">
                                     @else
@@ -179,11 +186,32 @@
                                             {{ Str::upper(Str::substr($vLabel, 0, 2)) }}
                                         </span>
                                     @endif
-                                    @if ($variant->stock === 0)
+                                    @if ($vTotal === 0)
                                         <span class="variant-sold-overlay"></span>
                                     @endif
                                 </button>
                                 @endforeach
+                            </div>
+
+                            {{-- Size chips — diisi JS saat varian dipilih --}}
+                            @php
+                                $firstSizes = $firstVar?->sizeStocks ?? collect();
+                            @endphp
+                            <div class="size-chip-row mb-2">
+                                @foreach ($firstSizes as $sIdx => $ss)
+                                    @php $soldOut = $ss->stock === 0; @endphp
+                                    <button type="button"
+                                            class="size-chip {{ $sIdx === 0 && !$soldOut ? 'selected' : '' }} {{ $soldOut ? 'sold-out' : '' }}"
+                                            data-size-id="{{ $ss->size_id }}"
+                                            data-size-stock="{{ $ss->stock }}"
+                                            title="{{ $ss->size?->size_name }} — Stok: {{ $ss->stock }}"
+                                            {{ $soldOut ? 'disabled' : '' }}>
+                                        {{ $ss->size?->size_name }}
+                                    </button>
+                                @endforeach
+                                @if ($firstSizes->isEmpty())
+                                    <small class="text-muted">Belum ada ukuran</small>
+                                @endif
                             </div>
                         @else
                             <p class="small text-muted mb-3">
@@ -607,6 +635,48 @@
     }
     /* Thumbnail sold-out: cursor tidak allowed */
     .variant-thumb[data-sold-out] { cursor: not-allowed; opacity: .75; }
+
+    /* ----- Size Chips ----- */
+    .size-chip-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+    }
+    .size-chip {
+        height: 28px;
+        min-width: 36px;
+        padding: 0 8px;
+        border-radius: 6px;
+        border: 1.5px solid #e4e6fc;
+        background: #f5f6ff;
+        color: #6777ef;
+        font-size: .72rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all .15s;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .size-chip:hover:not(:disabled) {
+        border-color: #6777ef;
+        background: #eceeff;
+    }
+    .size-chip.selected {
+        background: #6777ef;
+        border-color: #6777ef;
+        color: #fff;
+        box-shadow: 0 2px 8px rgba(103,119,239,.35);
+    }
+    .size-chip.sold-out,
+    .size-chip:disabled {
+        border-color: #e4e6fc;
+        background: #f8f9fa;
+        color: #c4c9e2;
+        cursor: not-allowed;
+        text-decoration: line-through;
+        opacity: .7;
+    }
 
     /* Tombol Add to Cart */
     .add-cart-btn { transition: transform .2s, background .2s; }
@@ -1146,44 +1216,62 @@ $(document).ready(function () {
     /* ============================================================
        LOGIKA KERANJANG
     ============================================================ */
-    function findItem(pid, vid) {
-        // vid bisa string (dari onclick) atau number (dari JSON) — pakai == agar keduanya cocok
-        return cart.find(i => i.pid === pid && i.vid == vid);
+    function findItem(pid, vid, sizeId) {
+        return cart.find(i => i.pid === pid && i.vid == vid && i.sizeId == sizeId);
+    }
+
+    function getSelectedSize($col) {
+        const $chip = $col.find('.size-chip.selected');
+        if (!$chip.length) return null;
+        return {
+            id    : parseInt($chip.data('size-id')),
+            stock : parseInt($chip.data('size-stock')),
+            name  : $chip.text().trim(),
+        };
     }
 
     function addToCart($col) {
-        const $thumb    = $col.find('.variant-thumb.selected');
-        const variants  = $col.find('.product-card').data('variants') || [];
-        const idx       = parseInt($thumb.data('variant-index'));
-        const v         = variants[idx];
+        const $thumb   = $col.find('.variant-thumb.selected');
+        const variants = $col.find('.product-card').data('variants') || [];
+        const idx      = parseInt($thumb.data('variant-index'));
+        const v        = variants[idx];
 
         if (!v) { toast('error', 'Pilih varian terlebih dahulu'); return; }
-        if (v.stock === 0) { toast('error', 'Stok varian ini habis'); return; }
+
+        const size = getSelectedSize($col);
+        if (!size) { toast('error', 'Pilih ukuran terlebih dahulu'); return; }
+        if (size.stock === 0) { toast('error', 'Stok ukuran ini habis'); return; }
 
         const pid  = $col.find('.add-cart-btn').data('product-id').toString();
         const name = $col.find('.add-cart-btn').data('product-name');
         const qty  = parseInt($col.find('.qty-input').val()) || 1;
         const img  = $col.find('.product-img').attr('src') || '';
 
-        const existing = findItem(pid, v.id);
+        const existing = findItem(pid, v.id, size.id);
         if (existing) {
             existing.qty += qty;
         } else {
-            cart.push({ pid, vid: v.id, name, price: v.price, qty, sku: v.sku, label: v.label, img });
+            cart.push({
+                pid, vid: v.id, sizeId: size.id,
+                name, price: v.price, qty,
+                sku: v.sku,
+                label: `${v.label} / ${size.name}`,
+                img,
+            });
         }
 
         renderCart();
     }
 
-    function updateQty(pid, vid, delta) {
-        const item = findItem(pid, vid);
+    function updateQty(pid, vid, sizeId, delta) {
+        const item = findItem(pid, vid, sizeId);
         if (!item) return;
         item.qty = Math.max(1, item.qty + delta);
         renderCart();
     }
 
-    function removeItem(pid, vid) {
-        const idx = cart.findIndex(i => i.pid === pid && i.vid == vid);
+    function removeItem(pid, vid, sizeId) {
+        const idx = cart.findIndex(i => i.pid === pid && i.vid == vid && i.sizeId == sizeId);
         if (idx > -1) { cart.splice(idx, 1); renderCart(); }
     }
 
@@ -1229,12 +1317,12 @@ $(document).ready(function () {
                         <p class="cart-item-variant mb-1">${item.label || item.sku}</p>
                         <div class="d-flex align-items-center">
                             <button class="cart-qty-btn"
-                                    onclick="POS.updateQty('${item.pid}','${item.vid}',-1)">
+                                    onclick="POS.updateQty('${item.pid}','${item.vid}','${item.sizeId}',-1)">
                                 −
                             </button>
                             <span class="cart-qty-display mx-2">${item.qty}</span>
                             <button class="cart-qty-btn"
-                                    onclick="POS.updateQty('${item.pid}','${item.vid}',1)">
+                                    onclick="POS.updateQty('${item.pid}','${item.vid}','${item.sizeId}',1)">
                                 +
                             </button>
                         </div>
@@ -1242,7 +1330,7 @@ $(document).ready(function () {
                     <div class="d-flex flex-column align-items-end ml-2" style="flex-shrink:0;gap:8px;">
                         <span class="cart-item-price">${fmt(item.price * item.qty)}</span>
                         <button class="cart-remove-btn"
-                                onclick="POS.removeItem('${item.pid}','${item.vid}')">
+                                onclick="POS.removeItem('${item.pid}','${item.vid}','${item.sizeId}')">
                             <i class="fas fa-times-circle"></i> Hapus
                         </button>
                     </div>
@@ -1317,29 +1405,59 @@ $(document).ready(function () {
         $col.find('.product-sku-label').text(v.sku);
         $col.find('.product-price-label').text('Rp ' + v.price.toLocaleString('id-ID'));
 
-        // Perbarui badge stok
-        const $badge = $col.find('.product-badge-stock');
-        if (v.stock > 5) {
-            $badge.attr('class', 'badge badge-pill badge-success product-badge-stock').text('In Stock');
-        } else if (v.stock > 0) {
-            $badge.attr('class', 'badge badge-pill badge-warning product-badge-stock').text('Stok Tipis');
+        // Render ulang size chips sesuai varian yang dipilih
+        const $sizeRow = $col.find('.size-chip-row').empty();
+        if (v.sizes && v.sizes.length > 0) {
+            v.sizes.forEach((s, si) => {
+                const soldOut  = s.stock === 0;
+                const selected = si === 0 && !soldOut ? 'selected' : '';
+                $sizeRow.append(
+                    `<button type="button"
+                         class="size-chip ${selected} ${soldOut ? 'sold-out' : ''}"
+                         data-size-id="${s.id}" data-size-stock="${s.stock}"
+                         title="${s.name} — Stok: ${s.stock}"
+                         ${soldOut ? 'disabled' : ''}>
+                        ${s.name}
+                     </button>`
+                );
+            });
         } else {
-            $badge.attr('class', 'badge badge-pill badge-danger product-badge-stock').text('Habis');
+            $sizeRow.html('<small class="text-muted">Belum ada ukuran</small>');
         }
 
-        // Aktif/non-aktif tombol tambah + ubah class & icon sesuai stok
-        const $addBtn   = $col.find('.add-cart-btn');
-        const outOfStock = v.stock === 0;
-        $addBtn.prop('disabled', outOfStock)
-               .attr('title', outOfStock ? 'Stok habis' : 'Tambah ke Keranjang')
-               .html('<i class="fas fa-cart-plus"></i>')
-               .toggleClass('btn-cart-disabled', outOfStock)
-               .toggleClass('btn-primary shadow-primary', !outOfStock);
+        // Badge stok total varian
+        const totalStock = v.sizes ? v.sizes.reduce((s, sz) => s + sz.stock, 0) : 0;
+        const $badge = $col.find('.product-badge-stock');
+        if (totalStock > 5)     $badge.attr('class','badge badge-pill badge-success product-badge-stock').text('In Stock');
+        else if (totalStock > 0)$badge.attr('class','badge badge-pill badge-warning product-badge-stock').text('Stok Tipis');
+        else                    $badge.attr('class','badge badge-pill badge-danger product-badge-stock').text('Habis');
 
-        // Aktif/non-aktif qty stepper
-        $col.find('.qty-dec, .qty-inc').prop('disabled', outOfStock);
-        $col.find('.qty-input').prop('disabled', outOfStock);
+        // Tombol tambah: aktif jika ada ukuran terpilih dengan stok > 0
+        refreshAddBtn($col);
     });
+
+    // Klik size chip
+    $(document).on('click', '.size-chip:not(:disabled)', function (e) {
+        e.stopPropagation();
+        const $col = $(this).closest('.product-col');
+        $col.find('.size-chip').removeClass('selected');
+        $(this).addClass('selected');
+        refreshAddBtn($col);
+    });
+
+    function refreshAddBtn($col) {
+        const size       = getSelectedSize($col);
+        const noVariant  = !$col.find('.variant-thumb.selected').length;
+        const outOfStock = !size || size.stock === 0;
+        const disabled   = noVariant || outOfStock;
+        const $addBtn    = $col.find('.add-cart-btn');
+        $addBtn.prop('disabled', disabled)
+               .attr('title', noVariant ? 'Pilih varian' : (outOfStock ? 'Stok habis' : 'Tambah ke Keranjang'))
+               .html('<i class="fas fa-cart-plus"></i>')
+               .toggleClass('btn-cart-disabled', disabled)
+               .toggleClass('btn-primary shadow-primary', !disabled);
+        $col.find('.qty-dec, .qty-inc, .qty-input').prop('disabled', disabled);
+    }
 
     // Tombol Tambah ke Keranjang
     $(document).on('click', '.add-cart-btn', function (e) {
@@ -1500,8 +1618,8 @@ $(document).ready(function () {
        EXPOSE GLOBAL — untuk onclick inline di HTML cart
     ============================================================ */
     window.POS = {
-        updateQty : (pid, vid, delta) => updateQty(pid, vid, delta),
-        removeItem: (pid, vid)        => removeItem(pid, vid),
+        updateQty : (pid, vid, sid, delta) => updateQty(pid, vid, sid, delta),
+        removeItem: (pid, vid, sid)        => removeItem(pid, vid, sid),
         resetSearch() {
             $productSearch.val('');
             $('.cat-btn').removeClass('btn-primary').addClass('btn-outline-primary');

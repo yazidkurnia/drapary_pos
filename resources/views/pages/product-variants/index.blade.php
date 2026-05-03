@@ -92,17 +92,6 @@
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label>Ukuran</label>
-                                <select class="form-control" id="size_id">
-                                    <option value="">-- Pilih Ukuran --</option>
-                                    @foreach($sizes as $item)
-                                        <option value="{{ $item->id }}">{{ $item->size_name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
                                 <label>Material</label>
                                 <select class="form-control" id="material_id">
                                     <option value="">-- Pilih Material --</option>
@@ -174,7 +163,7 @@
                     {{-- Inventori --}}
                     <div class="section-title font-weight-bold text-primary mb-2"><i class="fas fa-warehouse mr-1"></i> Inventori</div>
                     <div class="row">
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <div class="form-group">
                                 <label>Satuan</label>
                                 <select class="form-control" id="unit_id">
@@ -185,7 +174,7 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <div class="form-group">
                                 <label>Harga <span class="text-danger">*</span></label>
                                 <div class="input-group">
@@ -195,14 +184,18 @@
                                 <div class="invalid-feedback d-block" id="price_err"></div>
                             </div>
                         </div>
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label>Stok <span class="text-danger">*</span></label>
-                                <input type="number" class="form-control" id="stock" placeholder="0" min="0">
-                                <div class="invalid-feedback" id="stock_err"></div>
-                            </div>
-                        </div>
                     </div>
+
+                    {{-- Ukuran & Stok --}}
+                    <div class="section-title font-weight-bold text-primary mb-2 mt-1">
+                        <i class="fas fa-ruler mr-1"></i> Ukuran &amp; Stok
+                        <small class="text-muted font-weight-normal">(tambah minimal satu ukuran)</small>
+                    </div>
+                    <div id="add-size-stock-list"></div>
+                    <button type="button" class="btn btn-sm btn-outline-primary mt-1" onclick="addSizeRow('add')">
+                        <i class="fas fa-plus mr-1"></i> Tambah Ukuran
+                    </button>
+                    <div class="invalid-feedback d-block" id="size_stocks_err"></div>
 
                     <hr class="my-3">
 
@@ -286,17 +279,6 @@
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label>Ukuran</label>
-                                <select class="form-control" id="edit_size_id">
-                                    <option value="">-- Pilih Ukuran --</option>
-                                    @foreach($sizes as $item)
-                                        <option value="{{ $item->id }}">{{ $item->size_name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
                                 <label>Material</label>
                                 <select class="form-control" id="edit_material_id">
                                     <option value="">-- Pilih Material --</option>
@@ -367,7 +349,7 @@
 
                     <div class="section-title font-weight-bold text-primary mb-2"><i class="fas fa-warehouse mr-1"></i> Inventori</div>
                     <div class="row">
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <div class="form-group">
                                 <label>Satuan</label>
                                 <select class="form-control" id="edit_unit_id">
@@ -378,7 +360,7 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <div class="form-group">
                                 <label>Harga <span class="text-danger">*</span></label>
                                 <div class="input-group">
@@ -388,14 +370,18 @@
                                 <div class="invalid-feedback d-block" id="edit_price_err"></div>
                             </div>
                         </div>
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label>Stok <span class="text-danger">*</span></label>
-                                <input type="number" class="form-control" id="edit_stock" min="0">
-                                <div class="invalid-feedback" id="edit_stock_err"></div>
-                            </div>
-                        </div>
                     </div>
+
+                    {{-- Ukuran & Stok --}}
+                    <div class="section-title font-weight-bold text-primary mb-2 mt-1">
+                        <i class="fas fa-ruler mr-1"></i> Ukuran &amp; Stok
+                        <small class="text-muted font-weight-normal">(tambah minimal satu ukuran)</small>
+                    </div>
+                    <div id="edit-size-stock-list"></div>
+                    <button type="button" class="btn btn-sm btn-outline-primary mt-1" onclick="addSizeRow('edit')">
+                        <i class="fas fa-plus mr-1"></i> Tambah Ukuran
+                    </button>
+                    <div class="invalid-feedback d-block" id="edit_size_stocks_err"></div>
 
                     <hr class="my-3">
 
@@ -498,6 +484,10 @@
         .gallery-item:hover .gallery-overlay { background: rgba(0,0,0,.25); }
         .gallery-item .gallery-overlay i { color: #fff; font-size: 22px; opacity: 0; transition: opacity .2s; }
         .gallery-item:hover .gallery-overlay i { opacity: 1; }
+
+        /* Size-stock rows */
+        .size-stock-row { background: #f8f9ff; border: 1px solid #e4e6fc; border-radius: 8px; padding: 8px 10px; }
+        .size-stock-row .ss-size-select { border-color: #e4e6fc; }
     </style>
 @endpush
 
@@ -519,6 +509,7 @@
                 editPendingImages = [];
                 $('#edit-image-preview-wrap').empty();
                 $('#edit_image_input').val('');
+                $('#edit-size-stock-list').empty();
             });
             $(document).on('draw.dt', '#product-variants-table', function () {
                 $('[data-toggle="tooltip"]').tooltip();
@@ -570,6 +561,49 @@
             $(`#${mode}-pending-${idx}`).remove();
         }
 
+        /* ── Size stock helpers ────────────────────────────────── */
+        const SIZES = @json($sizes->map(fn($s) => ['id' => $s->id, 'name' => $s->size_name])->values());
+
+        function sizeOptions(excludeIds = []) {
+            return SIZES.map(s =>
+                `<option value="${s.id}" ${excludeIds.includes(s.id) ? 'disabled' : ''}>${s.name}</option>`
+            ).join('');
+        }
+
+        function addSizeRow(mode, sizeId = '', stock = 0) {
+            const listId = mode === 'add' ? 'add-size-stock-list' : 'edit-size-stock-list';
+            const idx    = Date.now();
+            const usedIds = getSizeStockData(mode).map(r => r.size_id);
+            const html = `
+                <div class="size-stock-row d-flex align-items-center mb-2" id="ssr-${idx}">
+                    <select class="form-control form-control-sm mr-2 ss-size-select" style="max-width:130px;">
+                        <option value="">-- Ukuran --</option>
+                        ${sizeOptions(usedIds)}
+                    </select>
+                    <div class="input-group input-group-sm mr-2" style="max-width:110px;">
+                        <div class="input-group-prepend"><span class="input-group-text">Stok</span></div>
+                        <input type="number" class="form-control ss-stock-input" value="${stock}" min="0" placeholder="0">
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-danger btn-icon"
+                            onclick="$(this).closest('.size-stock-row').remove()" title="Hapus baris">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>`;
+            $('#' + listId).append(html);
+            if (sizeId) $(`#ssr-${idx} .ss-size-select`).val(sizeId);
+        }
+
+        function getSizeStockData(mode) {
+            const listId = mode === 'add' ? 'add-size-stock-list' : 'edit-size-stock-list';
+            const result = [];
+            $('#' + listId + ' .size-stock-row').each(function () {
+                const sid = $(this).find('.ss-size-select').val();
+                const stk = parseInt($(this).find('.ss-stock-input').val()) || 0;
+                if (sid) result.push({ size_id: parseInt(sid), stock: stk });
+            });
+            return result;
+        }
+
         function buildFormData(prefix) {
             const p  = prefix ? prefix + '_' : '';
             const fd = new FormData();
@@ -577,7 +611,6 @@
             fd.append('product_id',  $('#' + p + 'product_id').val()   ?? '');
             fd.append('sku',         ($('#' + p + 'sku').val()         ?? '').trim());
             fd.append('color_id',    $('#' + p + 'color_id').val()     ?? '');
-            fd.append('size_id',     $('#' + p + 'size_id').val()      ?? '');
             fd.append('material_id', $('#' + p + 'material_id').val()  ?? '');
             fd.append('fit_id',      $('#' + p + 'fit_id').val()       ?? '');
             fd.append('sleeve_id',   $('#' + p + 'sleeve_id').val()    ?? '');
@@ -586,7 +619,12 @@
             fd.append('gender_id',   $('#' + p + 'gender_id').val()    ?? '');
             fd.append('unit_id',     $('#' + p + 'unit_id').val()      ?? '');
             fd.append('price',       $('#' + p + 'price').val()        ?? 0);
-            fd.append('stock',       $('#' + p + 'stock').val()        ?? 0);
+
+            const mode = prefix === 'edit' ? 'edit' : 'add';
+            getSizeStockData(mode).forEach((row, i) => {
+                fd.append(`size_stocks[${i}][size_id]`, row.size_id);
+                fd.append(`size_stocks[${i}][stock]`,   row.stock);
+            });
 
             const pending = prefix === 'edit' ? editPendingImages : addPendingImages;
             pending.filter(f => f !== null).forEach(f => fd.append('images[]', f));
@@ -595,12 +633,12 @@
         }
 
         function validateFields(prefix) {
-            const p      = prefix ? prefix + '_' : '';
-            let   valid  = true;
-            const pid    = $('#' + p + 'product_id').val();
-            const sku    = ($('#' + p + 'sku').val() ?? '').trim();
-            const price  = $('#' + p + 'price').val();
-            const stock  = $('#' + p + 'stock').val();
+            const p     = prefix ? prefix + '_' : '';
+            const mode  = prefix === 'edit' ? 'edit' : 'add';
+            let   valid = true;
+            const pid   = $('#' + p + 'product_id').val();
+            const sku   = ($('#' + p + 'sku').val() ?? '').trim();
+            const price = $('#' + p + 'price').val();
 
             if (!pid) { $('#' + p + 'product_id').addClass('is-invalid'); $('#' + p + 'product_id_err').text('Produk harus dipilih.'); valid = false; }
             else       { $('#' + p + 'product_id').removeClass('is-invalid'); }
@@ -608,8 +646,11 @@
             else       { $('#' + p + 'sku').removeClass('is-invalid'); }
             if (price === '' || Number(price) < 0) { $('#' + p + 'price_err').text('Harga harus diisi.'); valid = false; }
             else                                   { $('#' + p + 'price_err').text(''); }
-            if (stock === '') { $('#' + p + 'stock').addClass('is-invalid'); $('#' + p + 'stock_err').text('Stok harus diisi.'); valid = false; }
-            else              { $('#' + p + 'stock').removeClass('is-invalid'); }
+
+            const sizes = getSizeStockData(mode);
+            const errId = mode === 'edit' ? 'edit_size_stocks_err' : 'size_stocks_err';
+            if (sizes.length === 0) { $('#' + errId).text('Tambahkan minimal satu ukuran.'); valid = false; }
+            else                    { $('#' + errId).text(''); }
 
             return valid;
         }
@@ -634,6 +675,7 @@
             addPendingImages = [];
             $('#add-image-preview-wrap').empty();
             $('#add_image_input').val('');
+            $('#add-size-stock-list').empty();
         }
 
         /* ── CRUD ──────────────────────────────────────────────── */
@@ -678,7 +720,6 @@
                     }
                     $('#edit_sku').val(d.sku);
                     $('#edit_color_id').val(d.color_id     ?? '');
-                    $('#edit_size_id').val(d.size_id       ?? '');
                     $('#edit_material_id').val(d.material_id ?? '');
                     $('#edit_fit_id').val(d.fit_id         ?? '');
                     $('#edit_sleeve_id').val(d.sleeve_id   ?? '');
@@ -687,7 +728,10 @@
                     $('#edit_gender_id').val(d.gender_id   ?? '');
                     $('#edit_unit_id').val(d.unit_id       ?? '');
                     $('#edit_price').val(d.price);
-                    $('#edit_stock').val(d.stock);
+
+                    /* Load size stocks */
+                    $('#edit-size-stock-list').empty();
+                    (d.size_stocks ?? []).forEach(ss => addSizeRow('edit', ss.size_id, ss.stock));
 
                     /* existing images */
                     const $wrap = $('#edit-existing-images').empty();
