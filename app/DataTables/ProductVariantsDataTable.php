@@ -23,19 +23,28 @@ class ProductVariantsDataTable extends DataTable
             ->addColumn('variant_info', function ($row) {
                 $parts = [];
                 if ($row->color)   $parts[] = '<span class="badge badge-light border">' . e($row->color->color_name) . '</span>';
-                if ($row->size)    $parts[] = '<span class="badge badge-light border">' . e($row->size->size_name) . '</span>';
                 if ($row->material)$parts[] = '<span class="badge badge-light border">' . e($row->material->material_name) . '</span>';
                 if ($row->fit)     $parts[] = '<span class="badge badge-light border">' . e($row->fit->fit_name) . '</span>';
                 if ($row->sleeve)  $parts[] = '<span class="badge badge-light border">' . e($row->sleeve->sleeve_name) . '</span>';
                 if ($row->collar)  $parts[] = '<span class="badge badge-light border">' . e($row->collar->collar_name) . '</span>';
                 if ($row->pattern) $parts[] = '<span class="badge badge-light border">' . e($row->pattern->pattern_name) . '</span>';
                 if ($row->gender)  $parts[] = '<span class="badge badge-light border">' . e($row->gender->gender_name) . '</span>';
+                /* Ukuran tersedia */
+                foreach ($row->sizeStocks as $ss) {
+                    $stockClass = $ss->stock > 0 ? 'primary' : 'secondary';
+                    $parts[] = '<span class="badge badge-' . $stockClass . ' border" title="Stok: ' . $ss->stock . '">'
+                             . e($ss->size->size_name) . '</span>';
+                }
                 return $parts ? implode(' ', $parts) : '<span class="text-muted">-</span>';
             })
             ->addColumn('price_formatted', fn($row) => 'Rp ' . number_format($row->price, 0, ',', '.'))
             ->addColumn('stock_badge', function ($row) {
-                $class = $row->stock > 10 ? 'success' : ($row->stock > 0 ? 'warning' : 'danger');
-                return '<span class="badge badge-' . $class . '">' . $row->stock . '</span>';
+                $total = $row->sizeStocks->sum('stock');
+                $class = $total > 10 ? 'success' : ($total > 0 ? 'warning' : 'danger');
+                $label = $total > 0
+                    ? $total . ' <small style="font-size:.68rem;">(' . $row->sizeStocks->count() . ' ukuran)</small>'
+                    : '0';
+                return '<span class="badge badge-' . $class . '">' . $label . '</span>';
             })
             ->addColumn('images_preview', function ($row) {
                 $encId   = Crypt::encryptString($row->id);
@@ -84,8 +93,9 @@ class ProductVariantsDataTable extends DataTable
     public function query(ProductVariant $model): QueryBuilder
     {
         return $model->newQuery()->with([
-            'product.brand', 'color', 'size', 'material',
-            'fit', 'sleeve', 'collar', 'pattern', 'gender', 'unit', 'images',
+            'product.brand', 'color', 'material',
+            'fit', 'sleeve', 'collar', 'pattern', 'gender', 'unit',
+            'images', 'sizeStocks.size',
         ]);
     }
 

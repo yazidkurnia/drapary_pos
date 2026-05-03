@@ -48,15 +48,20 @@ class ManageProductVariantsController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'product_id' => 'required|exists:products,id',
-            'sku'        => 'required|string|max:100',
-            'price'      => 'required|numeric|min:0',
-            'stock'      => 'required|integer|min:0',
-            'images.*'   => 'nullable|image|max:2048',
+            'product_id'          => 'required|exists:products,id',
+            'sku'                 => 'required|string|max:100',
+            'price'               => 'required|numeric|min:0',
+            'size_stocks'         => 'nullable|array',
+            'size_stocks.*.size_id' => 'required|exists:sizes,id',
+            'size_stocks.*.stock'   => 'required|integer|min:0',
+            'images.*'            => 'nullable|image|max:2048',
         ]);
 
         try {
-            $variant = $this->manageVariantService->store(ProductVariantDTO::fromRequest($request));
+            $dto     = ProductVariantDTO::fromRequest($request);
+            $variant = $this->manageVariantService->store($dto);
+
+            $this->manageVariantService->sync_size_stocks($variant, $dto->sizeStocks);
 
             if ($request->hasFile('images')) {
                 $this->manageVariantService->store_images($variant, $request->file('images'));
@@ -81,15 +86,20 @@ class ManageProductVariantsController extends Controller
     public function update(Request $request, string $variantId)
     {
         $request->validate([
-            'product_id' => 'required|exists:products,id',
-            'sku'        => 'required|string|max:100',
-            'price'      => 'required|numeric|min:0',
-            'stock'      => 'required|integer|min:0',
-            'images.*'   => 'nullable|image|max:2048',
+            'product_id'          => 'required|exists:products,id',
+            'sku'                 => 'required|string|max:100',
+            'price'               => 'required|numeric|min:0',
+            'size_stocks'         => 'nullable|array',
+            'size_stocks.*.size_id' => 'required|exists:sizes,id',
+            'size_stocks.*.stock'   => 'required|integer|min:0',
+            'images.*'            => 'nullable|image|max:2048',
         ]);
 
         try {
-            $variant = $this->manageVariantService->update_service(ProductVariantDTO::fromRequest($request), $variantId);
+            $dto     = ProductVariantDTO::fromRequest($request);
+            $variant = $this->manageVariantService->update_service($dto, $variantId);
+
+            $this->manageVariantService->sync_size_stocks($variant, $dto->sizeStocks);
 
             if ($request->hasFile('images')) {
                 $this->manageVariantService->store_images($variant, $request->file('images'));

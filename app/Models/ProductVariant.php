@@ -13,14 +13,13 @@ class ProductVariant extends Model
 
     protected $fillable = [
         'product_id', 'sku',
-        'color_id', 'size_id', 'material_id', 'fit_id',
+        'color_id', 'material_id', 'fit_id',
         'sleeve_id', 'collar_id', 'pattern_id', 'gender_id',
-        'unit_id', 'price', 'stock',
+        'unit_id', 'price',
     ];
 
     public function product(): BelongsTo  { return $this->belongsTo(Product::class); }
     public function color(): BelongsTo   { return $this->belongsTo(Color::class); }
-    public function size(): BelongsTo    { return $this->belongsTo(Size::class); }
     public function material(): BelongsTo{ return $this->belongsTo(Material::class); }
     public function fit(): BelongsTo     { return $this->belongsTo(Fit::class); }
     public function sleeve(): BelongsTo  { return $this->belongsTo(Sleeve::class); }
@@ -32,5 +31,16 @@ class ProductVariant extends Model
     public function images(): HasMany
     {
         return $this->hasMany(ProductVariantImage::class)->orderBy('sort_order')->orderBy('id');
+    }
+
+    public function sizeStocks(): HasMany
+    {
+        return $this->hasMany(VariantSizeStock::class)->with('size')->orderBy('id');
+    }
+
+    /** Total stok dari semua ukuran */
+    public function getTotalStockAttribute(): int
+    {
+        return $this->sizeStocks->sum('stock');
     }
 }
